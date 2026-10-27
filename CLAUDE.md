@@ -16,6 +16,7 @@ Read what your task needs, not all of it.
 | How our code ports or runs a system | [docs/systems/](docs/systems/): `importer`, `plugins`, `runtime`, `movement`, `cameras`, `rendering`, `flags`, `scripts`, `characters`, `items`, `map-objects`, `wanderers`, `camping`, `combat`, `magic`, `saves`, `editor`, `ui`, `audio`, `weather`, `cinematics`, `events` |
 | How the packages are built and laid out, and how the release workflow numbers and describes releases | [docs/systems/releases.md](docs/systems/releases.md) |
 | The user's notes from playing the runtime and timing the original | [docs/playtests.md](docs/playtests.md) |
+| How to replace the game's graphics with a mod, written for people making one rather than for changing the code: what works today and what doesn't | [docs/replacing-graphics.md](docs/replacing-graphics.md) |
 | What only the user can settle, in the emulator or the ROM, and how to set a check up with a save written into the Controller Pak | [docs/user-checks.md](docs/user-checks.md) |
 | The emulator, gdb, the pinned Godot, Ghidra, the ROMs, checkpoint save states, `tools/`, the code index and the symbol map, and finding the original's code in its machine code | [docs/reference-rig.md](docs/reference-rig.md) |
 
