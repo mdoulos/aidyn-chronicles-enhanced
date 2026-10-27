@@ -64,6 +64,17 @@ public sealed class ImportOptionsTests : IDisposable
         Assert.Equal((RomVersionId.Na10, RomByteOrder.ByteSwapped), (opened.Version.Id, opened.OriginalByteOrder));
     }
 
+    /// <summary>A ROM hack that edits only 1.0's data tables, such as the stats of its entities, is imported as 1.0 (ADR 0031).</summary>
+    [Fact]
+    public void TheImportPageTakesADataEditOfNa10()
+    {
+        var na10 = TestRoms.Get(RomVersionId.Na10);
+        var edited = na10.Data.ToArray();
+        edited[na10.Layout.DbTables[DbTable.Entities].Offset + 0x30] ^= 0xFF;
+        var opened = ImportableRom.Open(Write("edit.z64", edited));
+        Assert.Equal((RomVersionId.Na10, true), (opened.Version.Id, opened.Version.DataEdit));
+    }
+
     [Fact]
     public void TheImportPageRefusesOtherVersionsWithTheirNames()
     {

@@ -245,9 +245,11 @@ internal static class MagicImporter
     /// <summary>
     /// Gives every spell its facts, and its aspect and placed area from the ROM's <c>unk1E</c> bits (1 Lunar and 2 Solar, which feed
     /// <c>Combatant.ResistRoll</c> and <c>SpellResistanceApplies</c>; 0x10 a placed area, which <c>CanCast</c>,
-    /// <c>BeginSpellTargeting</c> and <c>IsResistable</c> read). The facts and the ROM's spells must name each other exactly.
+    /// <c>BeginSpellTargeting</c> and <c>IsResistable</c> read). The facts and the ROM's spells must name each other exactly, unless
+    /// <paramref name="checkNames"/> is false, for a data edit of 1.0, which may rename a spell: it keeps the facts of its ID, as the
+    /// original's code goes by the spell and not its name (ADR 0031).
     /// </summary>
-    public static List<SpellRecord> WithEffects(List<SpellRecord> spells, EngineTables tables)
+    public static List<SpellRecord> WithEffects(List<SpellRecord> spells, EngineTables tables, bool checkNames = true)
     {
         var facts = Facts(tables).ToDictionary(f => Spell(f.Id));
         var byId = spells.ToDictionary(s => s.Id);
@@ -257,7 +259,7 @@ internal static class MagicImporter
         {
             if (!facts.TryGetValue(s.Id, out var fact))
                 throw new InvalidDataException($"The ROM's {s.Id} ({s.Name}) has no fact.");
-            if (fact.Name != s.Name)
+            if (checkNames && fact.Name != s.Name)
                 throw new InvalidDataException($"The fact for {s.Id} is for {fact.Name}, but the ROM's spell is {s.Name}.");
             if (fact.Area && s.Position != AreaKind)
                 throw new InvalidDataException($"{s.Id} ({s.Name}) is an area, but the code keys the area by kind {AreaKind}, not {s.Position}.");

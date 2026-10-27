@@ -64,6 +64,28 @@ The tables' bytes are 1.0's in every version except where the build put addresse
 
 A new table is one row: its length, 1.0's offset and the debug ROM's. 1.1 needs nothing more unless the table is before `0x8BAC4`.
 
+## Data edits of 1.0
+
+A ROM hack that changed only bytes inside the tables 1.0's layout places, the DB block's databases and string tables and the code segment's tables, imports as NA 1.0 under its own hash ([ADR 0031](../adr/0031-a-data-edit-of-1.0-imports.md)). `RomVersions.FindDataEdit` tells one by its **frame**: the SHA-1 of the image with the header's two checksums (`0x10`–`0x17`) and every placed table zeroed. 1.0's frame is `bfffd55d661378dc94133f1e263e04be0fc05d69` (`RomVersions.Na10Frame`), and a data edit's is the same.
+
+The 26 hacks of 1.0 the project's owner made, the Action Edition and the Doulos Edit, are all data edits. The Action Edition of Feb 7, 2026 (SHA-1 `4bbb9fcd…262e`) differs from 1.0 in these tables and nowhere else but the checksums:
+
+| Table | Bytes that differ |
+| --- | --- |
+| Entities | 2110 |
+| Shops | 1887 |
+| Items | 908 |
+| Weapons | 760 |
+| Armor | 487 |
+| Chests | 281 |
+| Potion prices (code) | 25 |
+| Skill training costs (code) | 20 |
+| Potion recipes (code) | 13 |
+| Weapon training costs (code) | 6 |
+| Stat training costs (code) | 5 |
+
+It moves weapons between positions as well as changing their numbers: position 53, the Bow of Accuracy in 1.0, is the Poisoned Bow. The original's code keys a flying weapon's speed by its position, so the importer's checks of a fact's name against 1.0's data apply to 1.0 alone.
+
 ## The Borg archive
 
 - **All three ROMs share one Borg archive**, byte for byte, at their own offsets.

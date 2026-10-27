@@ -16,7 +16,7 @@ internal static class CombatImporter
         ctx.WriteRecords("combat.json", new[]
         {
             BuildCombat(ctx.Engine, ctx.Db, ctx.Items, ctx.Rom.Table(CodeTable.BowKindWeapons), ctx.Rom.Table(CodeTable.ThrownKindWeapons),
-                ReadText(ctx.Rom, ctx.Db)),
+                ReadText(ctx.Rom, ctx.Db), checkNames: !ctx.Rom.Version.DataEdit),
         });
     }
 
@@ -42,9 +42,11 @@ internal static class CombatImporter
     /// ROM's two lists of weapon DB positions (<c>Combat.BowKindWeapons</c> <c>0x800E0C08</c> and <c>Combat.ThrownKindWeapons</c>
     /// <c>0x800E0C14</c>, read per version), each with the numbers <see cref="Muzzles"/> carries; a listed weapon with no fact, a fact
     /// for none listed, or a name that differs is an error. Spikes, position 100, is the one ranged weapon allowed in melee.
+    /// <paramref name="checkNames"/> is false for a data edit of 1.0, which may put another weapon at a position (ADR 0031).
     /// </summary>
     internal static CombatRecord BuildCombat(
-        EngineTables tables, GameDb db, ItemTables items, ReadOnlySpan<byte> bowList, ReadOnlySpan<byte> thrownList, CombatText text)
+        EngineTables tables, GameDb db, ItemTables items, ReadOnlySpan<byte> bowList, ReadOnlySpan<byte> thrownList, CombatText text,
+        bool checkNames = true)
     {
         RecordId At(int place) => DbRecordIds.Required(tables.EntityList[place], $"entity list place {place}");
         static bool Bystander(int place) => place <= 0x56 || place is >= 0x82 and <= 0x90 or >= 0x92 and <= 0x96;
@@ -62,8 +64,8 @@ internal static class CombatImporter
                 new(DbRecordIds.Flag(3749), true),
             ],
             Rooted: [At(0xAB)],
-            Missiles: Missiles(db, items, Positions(bowList), Positions(thrownList)),
-            CloseRange: [Weapon(db, SpikesPosition, "Spikes")],
+            Missiles: Missiles(db, items, Positions(bowList), Positions(thrownList), checkNames),
+            CloseRange: [Weapon(db, SpikesPosition, "Spikes", checkNames)],
             Bosses: [.. BossFlags.Select(b => new BossFlag(At(b.Place), DbRecordIds.Flag(b.Flag)))],
             BossStyles: [.. new[] { 0x57, 0x58, 0x59, 0x5E, 0x5F, 0x7A, 0xA7, 0xA8, 0xA9, 0xAB, 0xAD, 0xBA, 0xBC }.Select(At)],
             DroppedClasses: [WeaponClass.Hafted, WeaponClass.Missile, WeaponClass.Pole, WeaponClass.Sword, WeaponClass.Thrown],
@@ -203,8 +205,12 @@ internal static class CombatImporter
         throw new InvalidDataException("A weapon list doesn't end.");
     }
 
-    private static RecordId Weapon(GameDb db, int position, string name) =>
-        db.Weapons[position].Name == name
+    /// <summary>
+    /// The weapon at a DB position, which the original's code keys by. In 1.0 it's the weapon <paramref name="name"/> says, which checks the
+    /// position was read right. A data edit may put another weapon there, which takes the position's facts, as it does in the original.
+    /// </summary>
+    private static RecordId Weapon(GameDb db, int position, string name, bool checkName) =>
+        !checkName || db.Weapons[position].Name == name
             ? DbRecordIds.Required(db.Weapons[position].Id)
             : throw new InvalidDataException($"Weapon position {position} is {db.Weapons[position].Name}, not {name}.");
 
@@ -235,7 +241,7 @@ internal static class CombatImporter
     };
 
     /// <summary>The weapons that fly: the bow list's with the arrow, then the thrown list's with their own models (<c>LoadWeaponScene</c>).</summary>
-    private static List<Missile> Missiles(GameDb db, ItemTables items, List<int> bows, List<int> thrown)
+    private static List<Missile> Missiles(GameDb db, ItemTables items, List<int> bows, List<int> thrown, bool checkNames)
     {
         var listed = bows.Concat(thrown).ToList();
         if (listed.Count != Muzzles.Count || listed.Except(Muzzles.Keys).Any())
@@ -248,7 +254,7 @@ internal static class CombatImporter
             // A weapon with no model loads no scene at all, so it couldn't fly.
             if (!items.WeaponModels.ContainsKey(position))
                 throw new InvalidDataException($"{name} (position {position}) flies but has no model.");
-            return new(Weapon(db, position, name), bow ? RecordId.Hex(RecordTypes.Scene, ArrowScene) : null, speed, turn);
+            return new(Weapon(db, position, name, checkNames), bow ? RecordId.Hex(RecordTypes.Scene, ArrowScene) : null, speed, turn);
         }
     }
 }

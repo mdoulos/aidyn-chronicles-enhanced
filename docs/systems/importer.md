@@ -1,6 +1,6 @@
 # The importer and the base plugin (M1)
 
-`aidyn-renewed import <rom>` turns a ROM into `aidyn.base`, the plugin the runtime loads (ADR 0001). It goes to `plugins/aidyn.base` in the data folder ([runtime](runtime.md#the-data-folder)): from the CLI, `AIDYN_RENEWED_DATA` if set, else `%LOCALAPPDATA%\AidynRenewed`. `--out` puts it elsewhere. It refuses the debug ROM (ADR 0007). The editor's import page runs the same importer, asking for NA 1.0 alone ([editor](editor.md#the-import-page)).
+`aidyn-renewed import <rom>` turns a ROM into `aidyn.base`, the plugin the runtime loads (ADR 0001). It goes to `plugins/aidyn.base` in the data folder ([runtime](runtime.md#the-data-folder)): from the CLI, `AIDYN_RENEWED_DATA` if set, else `%LOCALAPPDATA%\AidynRenewed`. `--out` puts it elsewhere. It refuses the debug ROM (ADR 0007). It takes a data edit of NA 1.0, a ROM hack that changed only the tables the layout places, as 1.0 under its own hash ([ADR 0031](../adr/0031-a-data-edit-of-1.0-imports.md), [rom](../formats/rom.md#data-edits-of-10)); the checks that the importer's facts name what 1.0's data names, a flying weapon's position and a spell's ID, apply to 1.0 alone. The editor's import page runs the same importer, asking for NA 1.0 or a data edit of it ([editor](editor.md#the-import-page)).
 
 ## The player's choices
 

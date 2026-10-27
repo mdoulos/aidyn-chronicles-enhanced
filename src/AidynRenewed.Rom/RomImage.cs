@@ -5,7 +5,7 @@ namespace AidynRenewed.Rom;
 /// <summary>Thrown for a ROM that is a valid N64 image but not a version in <see cref="RomVersions"/>.</summary>
 public sealed class UnsupportedRomException(string sha1, RomHeader header)
     : Exception($"Unsupported ROM (SHA-1 {sha1}, name \"{header.Name}\", code \"{header.GameCode}\", revision {header.Revision}). " +
-                $"Supported: {string.Join(", ", RomVersions.All.Select(v => v.Name))}.")
+                $"Supported: {string.Join(", ", RomVersions.All.Select(v => v.Name))}, and ROM hacks of {RomVersions.Na10.Name} that edit only its data tables.")
 {
     public string Sha1 { get; } = sha1;
     public RomHeader Header { get; } = header;
@@ -41,7 +41,7 @@ public sealed class RomImage
     /// big-endian in place and owned by the returned image.
     /// </summary>
     /// <exception cref="InvalidDataException">Not an N64 ROM.</exception>
-    /// <exception cref="UnsupportedRomException">An N64 ROM, but not a known version.</exception>
+    /// <exception cref="UnsupportedRomException">An N64 ROM, but not a known version or a data edit of one.</exception>
     public static RomImage FromBytes(byte[] data)
     {
         var order = RomByteOrders.Detect(data);
@@ -49,7 +49,7 @@ public sealed class RomImage
 
         var header = RomHeader.Parse(data);
         var sha1 = Convert.ToHexStringLower(SHA1.HashData(data));
-        var version = RomVersions.FindBySha1(sha1) ?? throw new UnsupportedRomException(sha1, header);
+        var version = RomVersions.FindBySha1(sha1) ?? RomVersions.FindDataEdit(data, sha1) ?? throw new UnsupportedRomException(sha1, header);
         return new RomImage(data, order, sha1, header, version);
     }
 

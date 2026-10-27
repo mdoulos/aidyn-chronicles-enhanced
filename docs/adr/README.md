@@ -10,7 +10,7 @@ These are the Phase 0 decisions from the [roadmap](../roadmap.md) (task 0.5). Ea
 | [0004](0004-record-ids.md) | Record ID scheme | Accepted |
 | [0005](0005-plugin-format.md) | Plugin format: JSON with comments, field-level overrides | Accepted, partly superseded by [0016](0016-sequences-keep-the-originals-events.md) |
 | [0006](0006-tick-model-and-rng.md) | Tick model and RNG | Accepted, partly superseded by [0017](0017-the-core-steps-every-tick.md) |
-| [0007](0007-rom-versions.md) | ROM version support | Accepted, partly superseded by [0018](0018-the-port-fixes-bugs-and-sets-enhancements.md) |
+| [0007](0007-rom-versions.md) | ROM version support | Accepted, partly superseded by [0018](0018-the-port-fixes-bugs-and-sets-enhancements.md) and [0031](0031-a-data-edit-of-1.0-imports.md) |
 | [0008](0008-content-logic-layers.md) | Content logic: records, triggers, engine features, then Lua scripts | Accepted |
 | [0009](0009-code-organisation.md) | Code is organised by subsystem, and the Inspector is the one tool | Accepted, partly superseded by [0010](0010-editor-reads-plugins.md), [0011](0011-one-follow-camera.md) and [0015](0015-the-port-no-longer-reads-the-decomp.md) |
 | [0010](0010-editor-reads-plugins.md) | The editor reads only imported data | Accepted, partly superseded by [0012](0012-editor-holds-the-importer.md) |
@@ -34,5 +34,6 @@ These are the Phase 0 decisions from the [roadmap](../roadmap.md) (task 0.5). Ea
 | [0028](0028-the-project-is-hbht.md) | The project is HBHT: the code is `HBHT.*`, the editor is `HBHT.Editor`, the tool is `hbht` and the data folder is `HBHT`; "aidyn" stays for the game's names and the imported data (record IDs, `aidyn.base`) | Superseded by [0030](0030-the-project-is-aidyn-renewed.md) |
 | [0029](0029-content-fixes-wait-for-a-bugfix-mod.md) | The base import fixes only content that breaks the game; other content fixes wait for a bugfix mod | Accepted |
 | [0030](0030-the-project-is-aidyn-renewed.md) | The project is Aidyn Renewed, a fork of HBHT: the code is `AidynRenewed.*`, the tool is `aidyn-renewed`, the data folder is `AidynRenewed`, the packages are the fork's own; no third-party decompilation's names are cited, and the citations 0015 kept as credit are removed | Accepted |
+| [0031](0031-a-data-edit-of-1.0-imports.md) | A ROM hack of NA 1.0 that changed only bytes of the tables the layout places imports as 1.0 under its own hash; the importer's name checks against 1.0's data apply to 1.0 alone | Accepted |
 
 Statuses: **Proposed** means drafted and waiting for review. **Accepted** means agreed. **Superseded** means replaced by a later record, which it links to.

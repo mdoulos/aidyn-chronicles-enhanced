@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace AidynRenewed.Rom;
 
 public enum RomVersionId
@@ -44,7 +46,14 @@ public sealed record RomLayout
 
 /// <param name="Sha1">Lowercase hex SHA-1 of the big-endian image.</param>
 /// <param name="ResearchOnly">Readable, but the importer must never build <c>aidyn.base</c> from it.</param>
-public sealed record RomVersion(RomVersionId Id, string Name, string Sha1, bool ResearchOnly, RomLayout Layout);
+public sealed record RomVersion(RomVersionId Id, string Name, string Sha1, bool ResearchOnly, RomLayout Layout)
+{
+    /// <summary>
+    /// Whether this is a data edit of the version <see cref="RomVersion.Id"/> names (<see cref="RomVersions.FindDataEdit"/>): a ROM hack
+    /// that changed only bytes of the tables <see cref="RomVersion.Layout"/> places, so it's that version under its own name and hash (ADR 0031).
+    /// </summary>
+    public bool DataEdit { get; init; }
+}
 
 /// <summary>
 /// The supported ROMs and where each has its tables. NA 1.0's offsets are the table below; the other versions are NA 1.0
@@ -232,6 +241,40 @@ public static class RomVersions
 
     public static RomVersion? FindBySha1(string sha1) =>
         All.FirstOrDefault(v => string.Equals(v.Sha1, sha1, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>NA 1.0's <see cref="FrameSha1"/>: what every data edit of it shares.</summary>
+    internal const string Na10Frame = "bfffd55d661378dc94133f1e263e04be0fc05d69";
+
+    /// <summary>
+    /// The version <paramref name="image"/> is a data edit of, if it's one (ADR 0031): NA 1.0 under its own name and hash, with
+    /// 1.0's layout, when every byte but the header's checksums and the tables NA 1.0's layout places is NA 1.0's. Those tables
+    /// are what the importer reads the records from, so what an edit changed in them is imported; every other byte, the code
+    /// and the Borg archive among them, is the game the port reimplements. Null for anything else, NA 1.0 itself included.
+    /// </summary>
+    public static RomVersion? FindDataEdit(ReadOnlySpan<byte> image, string sha1) =>
+        !string.Equals(sha1, Na10.Sha1, StringComparison.OrdinalIgnoreCase) && FrameSha1(image, Na10.Layout) == Na10Frame
+            ? Na10 with { Name = $"{Na10.Name} with edited data", Sha1 = sha1.ToLowerInvariant(), DataEdit = true }
+            : null;
+
+    /// <summary>
+    /// The SHA-1 of <paramref name="image"/> with what a data edit may change zeroed: the header's two checksums (<c>0x10</c>–<c>0x17</c>),
+    /// which every edit makes again, and every table <paramref name="layout"/> places. Null for an image too short to hold them.
+    /// </summary>
+    internal static string? FrameSha1(ReadOnlySpan<byte> image, RomLayout layout)
+    {
+        RomRange[] holes =
+        [
+            new(0x10, 8),
+            .. layout.CodeTables.Values, .. layout.DbTables.Values, .. layout.StringTables.Values,
+        ];
+        var length = image.Length;
+        if (holes.Any(hole => hole.Offset + hole.Length > length))
+            return null;
+        var frame = image.ToArray();
+        foreach (var hole in holes)
+            frame.AsSpan(hole.Offset, hole.Length).Clear();
+        return Convert.ToHexStringLower(SHA1.HashData(frame));
+    }
 
     /// <param name="code">Where the version has a code table, if not where <paramref name="moves"/> puts NA 1.0's.</param>
     /// <param name="mapChunkLists">Where the version has the map sets' chunk lists, if not where <paramref name="moves"/> puts NA 1.0's.</param>

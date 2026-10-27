@@ -336,7 +336,8 @@ static int Flags(string[] flags)
 }
 
 /// <summary>The default output folder of a dump: out/&lt;version&gt;/&lt;name&gt;.</summary>
-static string OutDir(RomImage rom, string name) => Path.Combine("out", rom.Version.Id.ToString().ToLowerInvariant(), name);
+static string OutDir(RomImage rom, string name) => Path.Combine("out",
+    rom.Version.Id.ToString().ToLowerInvariant() + (rom.Version.DataEdit ? $"-edit-{rom.Sha1[..8]}" : ""), name);
 
 /// <summary>Whether the arguments after the ROM are none, or <c>--out &lt;dir&gt;</c>.</summary>
 static bool OutOnly(string[] rest, out string? outDir)

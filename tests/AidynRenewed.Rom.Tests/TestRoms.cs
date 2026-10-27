@@ -89,7 +89,9 @@ public static class TestRoms
             try
             {
                 var image = RomImage.Load(path);
-                images.TryAdd(image.Version.Id, image);
+                // A data edit of 1.0 is 1.0's ID under another hash; the tests are the versions' own.
+                if (!image.Version.DataEdit)
+                    images.TryAdd(image.Version.Id, image);
             }
             catch (Exception e) when (e is UnsupportedRomException or InvalidDataException)
             {

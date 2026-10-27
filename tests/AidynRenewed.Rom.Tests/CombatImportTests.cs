@@ -1,7 +1,9 @@
 using AidynRenewed.Plugins;
 using AidynRenewed.Plugins.Records;
 using AidynRenewed.Rom.Db;
+using AidynRenewed.Rom.Engine;
 using AidynRenewed.Rom.Import;
+using AidynRenewed.Rom.Quests;
 
 namespace AidynRenewed.Rom.Tests;
 
@@ -38,6 +40,32 @@ public sealed class CombatImportTests(Na10Import fixture)
         { 0x072F, "Hatchet", false, 5, 0 },
         { 0x0730, "Javelin", false, 5, 90 },
     };
+
+    /// <summary>
+    /// The original keys a flying weapon's speed by its position in the weapon DB, so in a data edit that puts another weapon at a bow's
+    /// position, that weapon flies as the bow did (ADR 0031): here 1.0 with the Bow of Accuracy, position 53, renamed, as the Action
+    /// Edition replaces it with the Poisoned Bow. In 1.0 the name is checked, which catches a misread position.
+    /// </summary>
+    [Fact]
+    public void ADataEditsWeaponAtABowsPositionFliesAsThatBow()
+    {
+        var na10 = TestRoms.Get(RomVersionId.Na10);
+        var bytes = na10.Data.ToArray();
+        var weapons = na10.Layout.DbTables[DbTable.Weapons];
+        var at = weapons.Offset + bytes.AsSpan(weapons.Offset, weapons.Length).IndexOf("Bow of Accuracy\0"u8);
+        "Renamed Bow\0\0\0\0\0"u8.CopyTo(bytes.AsSpan(at));
+
+        var rom = RomImage.FromBytes(bytes);
+        Assert.True(rom.Version.DataEdit);
+        var db = GameDb.Read(rom);
+        Assert.Equal("Renamed Bow", db.Weapons[53].Name);
+        CombatRecord Build(bool checkNames) => CombatImporter.BuildCombat(EngineTables.Read(rom), db, ItemTables.Read(rom),
+            rom.Table(CodeTable.BowKindWeapons), rom.Table(CodeTable.ThrownKindWeapons), CombatImporter.ReadText(rom, db), checkNames);
+
+        Assert.Equal("Weapon position 53 is Renamed Bow, not Bow of Accuracy.", Assert.Throws<InvalidDataException>(() => Build(true)).Message);
+        var missile = Assert.Single(Build(false).Missiles!, m => m.Weapon == Weapon(db.Weapons[53].Id.Value));
+        Assert.Equal((Arrow, 9.9f), (missile.Scene, missile.Speed));
+    }
 
     [Fact]
     public void SixteenWeaponsFly()

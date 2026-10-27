@@ -50,7 +50,7 @@ public partial class ImportPage : VBoxContainer
         // Out of date rather than missing: the import has to be done again.
         if (BasePlugin.IsImported(pluginsDirectory) && BasePlugin.Diagnose(pluginsDirectory) is not null)
             AddChild(Wrapped("Your import is from an older version of Aidyn Renewed and has to be done again."));
-        AddChild(Wrapped("A North American 1.0 ROM is required."));
+        AddChild(Wrapped("A North American 1.0 ROM is required, or a ROM hack of it that edits only the game's data, such as its stats, items and shops."));
 
         var row = new HBoxContainer();
         row.AddChild(new Label { Text = "ROM:" });
@@ -112,7 +112,7 @@ public partial class ImportPage : VBoxContainer
     }
 
     /// <summary>
-    /// What Import does (and <c>--import 1</c>): checks the ROM is NA 1.0 and runs the importer into the plugins folder off the main
+    /// What Import does (and <c>--import 1</c>): checks the ROM is NA 1.0 or a data edit of it (ADR 0031) and runs the importer into the plugins folder off the main
     /// thread, showing its steps, then remembers the ROM for next time. What's wrong is shown on the page, and the controls come back.
     /// </summary>
     public async Task ImportAsync()
