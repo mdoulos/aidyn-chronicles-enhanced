@@ -50,14 +50,14 @@ Sizes are relative: S, M, L, XL. **Bold** tasks block other work. Phase 0 settle
 | --- | --- | --- | --- |
 | **0.1 Reference rig.** An emulator with a debugger, the NA 1.0 and debug ROMs, and save states at story checkpoints. | S | [reference-rig](reference-rig.md) | Done |
 | **0.2 ROM identification.** Hashing, byte-order normalisation, header parsing, and a per-version offset table. | S | `RomImage` | Done |
-| **0.3 Borg archive reader.** `Borg_List` and the LZB and LZ01x decompressors. | M | Unblocked Phase 1 | Done |
+| **0.3 Borg archive reader.** The archive index and the LZB and LZ01x decompressors. | M | Unblocked Phase 1 | Done |
 | **0.4 DB table readers,** cross-checked against AidynEditor. | M | Typed records | Done |
 | **0.5 Architecture decisions** as ADRs. | S | `docs/adr/` | Done |
 | **0.6 Asset inspector,** which becomes the editor over imported data ([ADR 0010](adr/0010-editor-reads-plugins.md)). | M, ongoing | [editor](systems/editor.md) | Done Sep 30, 2026; grows into the mod editor (Phase 5) |
 
-#### Reading the code without the decomp
+#### Reading the code with our own rig
 
-[ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md) stops the project reading the decomp. These tasks give the rig what the decomp gave: a way to find a system's code, names for it, and the layout of what it touches. The [reference rig](reference-rig.md) says how to use each. Anything derived from the ROMs goes to the gitignored `out/`, except the symbol map, which holds only addresses and our names.
+Since [ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md) the project reads only the ROM, the emulator and its own rig. These tasks give the rig a way to find a system's code, names for it, and the layout of what it touches. The [reference rig](reference-rig.md) says how to use each. Anything derived from the ROMs goes to the gitignored `out/`, except the symbol map, which holds only addresses and our names.
 
 | Task | Size | Output | Status |
 | --- | --- | --- | --- |
@@ -80,7 +80,7 @@ Each track ends with an exporter to an open format and a viewer in the editor: i
 | **1B Animation** | Borg6 tracks, Borg7 actors, Borg5 particles | L | The opening cinematic plays in the editor | Done Sep 27, 2026 |
 | **1C Maps** | Chunk tables per map set, Borg9 collision and map objects, Expansion Pak variants | L | A map viewer shows a whole map set with its objects | Done Sep 27, 2026 |
 | **1D Audio** | Borg11 PCM, Borg12 sequences and their playback, the audiokey table | M | BGM plays correctly | Done Oct 10, 2026; what isn't played yet is in [audio](systems/audio.md) |
-| **1E Quest atlas** | Borg13 decoding with its branching, the flag network, flag cross-references, journal linkage | L | What sets and reads every flag, and which journal entry it maps to (`hbht flag <n>`, and the editor's Atlas tab) | Done |
+| **1E Quest atlas** | Borg13 decoding with its branching, the flag network, flag cross-references, journal linkage | L | What sets and reads every flag, and which journal entry it maps to (`aidyn-renewed flag <n>`, and the editor's Atlas tab) | Done |
 | **1F Text & UI assets** | String tables, the fonts, portraits, menu images | S | The dialogue box renders in the right font | Done |
 | **1G Saves** (optional) | Importing the original's Controller Pak saves | M | An original save imports | Open. The checkpoints already convert into saves (2.8). |
 | **1H Hardcoded content** | Every piece of content in code rather than data, each assigned an [ADR 0008](adr/0008-content-logic-layers.md) layer | M | [hardcoded-content](hardcoded-content.md) | Done Oct 19, 2026: every content table is read or carried |
@@ -129,7 +129,7 @@ The base game is a plugin, so the mod format is exercised all the time; Phase 5 
 
 | Task | Size | Status |
 | --- | --- | --- |
-| Plugin loader: load order, dependencies, field-level merge, conflict report | M | Done: `PluginSet`, `hbht conflicts`, `hbht schema` |
+| Plugin loader: load order, dependencies, field-level merge, conflict report | M | Done: `PluginSet`, `aidyn-renewed conflicts`, `aidyn-renewed schema` |
 | Flag and ID allocation for mod namespaces | S | |
 | Asset overrides (glTF, PNG, OGG) and new assets | M | |
 | Scripting: a Borg13 superset for dialogue and cut-scenes, plus sandboxed Lua event handlers on the 2.10 events (ADR 0008). Mods can't load .NET assemblies. | L | |
@@ -146,7 +146,7 @@ Widescreen, higher resolution, higher frame rate, longer draw distance, rebindab
 | Risk | Impact | Mitigation |
 | --- | --- | --- |
 | Combat and AI formulas are hard to verify by eye | Balance feels "off" | Exact RNG port plus differential tests (2.9). Read constants from the machine code rather than inferring them from play. |
-| Finding code without the decomp's map ([ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md)) | Research runs cost more, and a system's code can be missed | The code index, the symbol map and the debug build's source files (0.7–0.9), with watchpoints and traces on checkpoints (0.11, 0.12). |
+| Finding code with only the ROM, the emulator and our own rig ([ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md)) | Research runs cost more, and a system's code can be missed | The code index and the symbol map replace any third-party map, with the debug build's source files (0.7–0.9) and watchpoints and traces on checkpoints (0.11, 0.12). |
 | Content hardcoded in code that the audit misses | Mods can't reach it, or content is missing | The 1H audit and the quest atlas's reachability check in Phase 4 |
 | Scope fatigue over several years | Project dies | Vertical slices so something is always playable. The editor is useful to the community on its own. |
-| Legal | Takedown | Never distribute ROM-derived assets or data; plugins ship only as deltas and original assets. The project no longer reads the decomp, which has **no licence** ([ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md)), and never copied its code. The README credits it for the early research. |
+| Legal | Takedown | Never distribute ROM-derived assets or data; plugins ship only as deltas and original assets. The project reads only the ROM, the emulator and its own rig ([ADR 0015](adr/0015-the-port-no-longer-reads-the-decomp.md)). |

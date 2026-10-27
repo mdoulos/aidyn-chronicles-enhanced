@@ -1,6 +1,6 @@
 # Cameras
 
-`HBHT.Core.Cameras`. The user's timings are in [playtests](../playtests.md).
+`AidynRenewed.Core.Cameras`. The user's timings are in [playtests](../playtests.md).
 
 ## Why the original behaves as it does
 
@@ -8,10 +8,10 @@ The shape of `Camera::Mode0` (`0x800a6e64`) explains the timings in [playtests](
 
 ## The follow camera (`Camera::Mode0`)
 
-Ported as `HBHT.Core.Cameras.FollowCamera`, from `Camera::Mode0` and the R orbit (`0x800a72bc`, the decomp's `FUN_800b0fac`), which `Mode0` and `Mode1` both call.
+Ported as `AidynRenewed.Core.Cameras.FollowCamera`, from `Camera::Mode0` and the R orbit (`FollowCamera.Orbiting`, `0x800a72bc`), which `Mode0` and `Mode1` both call.
 
 - With R held, the orbit keeps the camera between 0 and 5 above the aim at a distance of 5, so it tops out at 45°.
-- **Port addition: moving while orbiting.** In the original the stick orbits with R held and he stands still. On a dual-stick pad the right stick, Q and E, and the mouse turn the camera while the left stick or WASD still walk him (`PlayerInput.Free`, in `HBHT.Core.Trek`); only R with the stick holds him, as on the N64. The orbit's goal is a fixed point it turns about, so a walking player would leave it behind and swing the view. While he walks, `FollowCamera.Orbit(…, moving: true)` carries that point by how far the aim moved each tick, so the view stays as it was turned. Letting go of the stick returns the camera behind him as it does after R. The user chose this.
+- **Port addition: moving while orbiting.** In the original the stick orbits with R held and he stands still. On a dual-stick pad the right stick, Q and E, and the mouse turn the camera while the left stick or WASD still walk him (`PlayerInput.Free`, in `AidynRenewed.Core.Trek`); only R with the stick holds him, as on the N64. The orbit's goal is a fixed point it turns about, so a walking player would leave it behind and swing the view. While he walks, `FollowCamera.Orbit(…, moving: true)` carries that point by how far the aim moved each tick, so the view stays as it was turned. Letting go of the stick returns the camera behind him as it does after R. The user chose this.
 - **Port addition: steering it.** What turns the camera is the player's to bind on the options' Controls page ([ui](ui.md#controls), [ADR 0026](../adr/0026-controls-are-bound-by-situation.md)), and `Game.ReadInput` makes the `PlayerInput` from it:
   - **Camera's own sources** (by default the right stick) and Camera Left and Right (Q and E) turn it while he walks, as above.
   - **Camera Hold** (RB, or the right mouse button) is R. A source on both Move and Camera (by default the left stick) moves him, and while Camera Hold is held steers the camera instead, and he stands still (`PlayerInput.Free` false, as R with the stick). A source on Move alone still walks him under the hold, so WASD walks while the mouse turns the camera with the right button held, as before. He stands still only while what would have moved him steers.
@@ -19,13 +19,13 @@ Ported as `HBHT.Core.Cameras.FollowCamera`, from `Camera::Mode0` and the R orbit
   - **Stick look:** the right stick on Camera, the default, turns it as Q and E do; pushed up it raises the camera, as R with the stick does. The mouse's up lowers it, as mouse look does in most games. There's no Invert row: the stick keeps the N64's sense, and the mouse the PC's, and neither has been asked to change.
 - `Mode0` doesn't avoid walls at all. Only the R orbit pulls in. It moves an eighth of the way a frame toward a point 0.25 *past* the wall (the ROM has the −0.25), while still easing out toward 5. The two settle about 3.1 from the player, so with a wall any closer, the camera ends up behind it.
 - Interiors use `Mode1`, which does keep the camera off walls (below).
-- Loading and dialogue set a quick swing (`unk80`), but the first tick after a load cancels it, because the anchor starts at the origin.
+- Loading and dialogue set a quick swing (`+0x80`), but the first tick after a load cancels it, because the anchor starts at the origin.
 
 ## Which mode
 
 The camera's mode is chosen only when the player goes through a teleporter (`TeleportPlayer`), by the chunk he arrives in: `Mode1` where its terrain doesn't draw the sky (the original's sky type 4: terrains 6, 8, 9, 11 and 13–16, the importer's `TerrainRecord.SkyDrawn` false), `Mode0` elsewhere. Walking from chunk to chunk keeps it, so Gwernia castle's courtyard (terrain 25) keeps whatever mode the door into it gave. Loading a save from the game's menu teleports too, so it chooses the same way. Loading from the title screen doesn't: the zone engine starts in `Mode0` and keeps it until the next door, so the outdoor camera shows inside a house until a camera object takes over. That's a bug, and the port fixes it, as the user chose (ADR 0018): however the game starts, the chunk chooses. `FollowCamera.Mode` holds it, and `FollowCamera.ModeFor` chooses it.
 
-A teleport places the camera (`FollowCamera.Arrive`): first it moves with the player and stops orbiting (`ApplyZoneVelocity`, `GiveCameraToPlayer`), then it goes to the teleporter's camera point if it names one. Otherwise, in an interior it's 4 *in front of* the player and 3 up, looking back at him: the original subtracts its facing, which points behind him. Outdoors it's behind him, as a map load puts it, and swings round quickly for 5 frames (`unk80`).
+A teleport places the camera (`FollowCamera.Arrive`): first it moves with the player and stops orbiting (`ApplyZoneVelocity`, `GiveCameraToPlayer`), then it goes to the teleporter's camera point if it names one. Otherwise, in an interior it's 4 *in front of* the player and 3 up, looking back at him: the original subtracts its facing, which points behind him. Outdoors it's behind him, as a map load puts it, and swings round quickly for 5 frames (`+0x80`).
 
 Camera objects work through a teleport's fade as well, as the original's zone engine runs on under it, so the room's camera has the camera as the screen comes up.
 
@@ -43,11 +43,11 @@ Ported as `FollowCamera.Interior.cs`, with the arguments `ProcessGameCamera` pas
 
 ## The combat camera (`ProcessCombatCamera`)
 
-Ported as `HBHT.Core.Combat.CombatCamera`, from `ProcessCombatCamera` (`0x8008D8BC`, camera mode 4). It's the interiors' camera with other numbers, which `FollowCamera.StepLeashed` takes (`LeashNumbers`; the interiors' are `FollowCamera.Interior`): the goal leashed 4 to 10 from the aim in X and Z (8 to 16 while aiming a flask or placing an area), 2 above it, the aim 1.05 above the body that owns the camera and chasing it at 1/16 a tick, at most 1, the eye at 1/32, at most 0.5. It's put 8 behind a party member away from the nearest enemy, 1.5 up, at once on the battle's first frame and as a goal when a member's turn takes the camera; through an enemy's turn the eye holds where its goal was, at least 4 from the aim; and it's kept a unit above the arena's floor. [Combat](combat.md#the-rest-by-entry-point) has the addresses.
+Ported as `AidynRenewed.Core.Combat.CombatCamera`, from `ProcessCombatCamera` (`0x8008D8BC`, camera mode 4). It's the interiors' camera with other numbers, which `FollowCamera.StepLeashed` takes (`LeashNumbers`; the interiors' are `FollowCamera.Interior`): the goal leashed 4 to 10 from the aim in X and Z (8 to 16 while aiming a flask or placing an area), 2 above it, the aim 1.05 above the body that owns the camera and chasing it at 1/16 a tick, at most 1, the eye at 1/32, at most 0.5. It's put 8 behind a party member away from the nearest enemy, 1.5 up, at once on the battle's first frame and as a goal when a member's turn takes the camera; through an enemy's turn the eye holds where its goal was, at least 4 from the aim; and it's kept a unit above the arena's floor. [Combat](combat.md#the-rest-by-entry-point) has the addresses.
 
 ## Camera objects (`processVoxelCamera`)
 
-Ported as `CameraMove`. A camera object takes the camera while the player is in its reach ([map-objects](map-objects.md#camera-objects) has how he reaches it). While it moves the camera or its aim, the follow camera does nothing the next tick (`camera_mode` 2, then `RevertMode`), and when it lets go, the follow camera carries on from where the camera is, in its own mode.
+Ported as `CameraMove`. A camera object takes the camera while the player is in its reach ([map-objects](map-objects.md#camera-objects) has how he reaches it). While it moves the camera or its aim, the follow camera does nothing the next tick (mode 2, then `RevertMode`), and when it lets go, the follow camera carries on from where the camera is, in its own mode.
 
 - **Its first tick** starts the move from wherever the camera is now, toward its reference point (or, without one, the player's sphere's bottom plus 1.05, or 0.5 in a conversation). A cut that tracks aims straight at the player then. The original does that for every tracking move, which jolts the view when a pan or an ease takes over (below).
 - **The moves,** each over its duration (the values' Z) in ticks: a cut (0x1) jumps there at once; a pan (0x2) goes at a steady speed; a sine (0x4) eases in and out, (1 − cos) / 2 over half a turn; 0x8 eases in, 1 − cos over a quarter turn; 0x10 eases out, sin over a quarter turn. Flag 0x4000 moves the aim and 0x8000 the camera; no object does both. Each writes the camera or its aim, not their goals.
@@ -60,19 +60,19 @@ Ported as `CameraMove`. A camera object takes the camera while the player is in 
 
 ## The conversation camera
 
-From 1.0's machine code. Talking to a wanderer, both bodies are flagged `ACTOR_800`, and the player's camera focus is cleared (`ClearPlayerCamFocus`). Each frame, `ProcessPlayers` (`0x80012854`–`0x80012968`) gathers the flagged bodies and, in trek with no focus, frames them (`CreateFocusFromMultiple`, `0x800a77b4`):
+From 1.0's machine code. Talking to a wanderer, both bodies are flagged 0x800, and the player's camera focus is cleared (`ClearPlayerCamFocus`). Each frame, `Bodies.Process` (`0x80012854`–`0x80012968`) gathers the flagged bodies and, in trek with no focus, frames them (`CreateFocusFromMultiple`, `0x800a77b4`):
 
 - **The focus** is the midpoint of the two bodies farthest from their centroid: with two, the midpoint between them. It's anchored there (`SetFeild70`) and the camera aims at it as at the player.
 - **The way it looks:** with h from the farthest body to the focus, the facing passed is (−|h.z|, |h.x|), normalised, in the original's reversed facing (`0x800a79cc`–`7a08`), so the camera sits that way from the focus: always toward −X and +Z, whoever stands where. That's across the line between the two when it runs from −X−Z to +X+Z, and along it, looking past one at the other, when it runs from −X+Z to +X−Z.
 - **The distance** is (|h| + 4) / tan 33.5°, at least 5 (`0x800cdb14`): 33.5° is half of the 75° field of view (`0x800cdb10`) less 8. Two bodies 1.6 apart put it about 7.2 away.
-- It's stepped as the follow camera with that distance (`unk5c`) for the frame, then the distance goes back to the default, and `unk80` is 1, a quick swing each frame.
+- It's stepped as the follow camera with that distance (`+0x5C`) for the frame, then the distance goes back to the default, and `+0x80` is 1, a quick swing each frame.
 - The port's framing matches the original's, the odd side included, and the user chose to keep it: it may be what keeps the camera out of walls somewhere. A better conversation camera, placed as cut-scenes' are, is an idea for much later.
 - **A camera object holding the camera** keeps it where it is: the conversation doesn't take over, which spares interiors' cameras. The port keeps camera objects and trigger triangles' cameras working through a conversation, and `FollowCamera.Frame` leaves a held camera be, as `Step` does.
-- At the end the camera is given back to the player (`GiveCameraToPlayer`) with a quick swing of 5 frames (`unk80` 5), and its pitch back to the default.
+- At the end the camera is given back to the player (`GiveCameraToPlayer`) with a quick swing of 5 frames (`+0x80` 5), and its pitch back to the default.
 
 ## Cut-scenes' cameras
 
-`ScriptCameras`, from 1.0's machine code. Each camera op of a script starts a move that holds the camera for its duration (`DialougCreateScriptCamera`, `AllocScriptCamera` at `0x800168f8`): a camera object's move (`CameraMove`) with the op's flags, aimed at a point the op chose as it ran.
+`ScriptCameras`, from 1.0's machine code. Each camera op of a script starts a move that holds the camera for its duration (`AllocScriptCamera` at `0x800168f8`): a camera object's move (`CameraMove`) with the op's flags, aimed at a point the op chose as it ran.
 
 - **The ops** (`DialoguePreCallback`, jump table `0x800d1d80`), each over the script's camera time (60 until set), or one tick for a cut:
 
@@ -91,7 +91,7 @@ From 1.0's machine code. Talking to a wanderer, both bodies are flagged `ACTOR_8
   | TrackOn | aim | chase | where the speaker stood (no script uses it) |
 
   Angle-to and pan-to are crossed between the point and actor forms (AngleTo steady, AngleToActor eased, as the table has them).
-- **An actor's eyes** are 0.15 in front of it, at its sphere's centre raised by its height × scale less 0.2 (`GetHeightMinPoint2`) and its scaled radius: Alaron's 1.62 above his feet. They're taken as the op runs, not followed. A point-of-view cut hides the actor (`ACTOR_2000`), but not its shadow or what it holds; a cut or sine to a point or an actor, or a spawn, shows every actor again (`0x80014dfc`). The flag is tested only where `Bodies.Render` (`0x80013dcc`) draws a body's own scene, and only while a cut-scene plays (`CutScene.Playing`, `0x800dfe14`, at `0x8001403C`–`0x80014058`); what it holds is drawn after that test (body `+0x730`), and the shadows (`Shadows.Render`, `0x80012358`, from `RenderZones` before the bodies) test only the body's slot, its distance from the aim and its own alpha (`+0x70C`), which a hide leaves alone. So the camera at an actor's eyes sees its shadow beneath it, as the port draws it (`CutSceneActorView`): the point-of-view shots of Pochanargat's (`aidyn:dialogue/0x04FD`) and Phelan's (`0x04FE`) scenes have one. The user saw such a shadow with no body over it late in the game and confirmed from footage of the original that it's drawn there too (Oct 24, 2026).
+- **An actor's eyes** are 0.15 in front of it, at its sphere's centre raised by its height × scale less 0.2 (`GetHeightMinPoint2`) and its scaled radius: Alaron's 1.62 above his feet. They're taken as the op runs, not followed. A point-of-view cut hides the actor (flag 0x2000), but not its shadow or what it holds; a cut or sine to a point or an actor, or a spawn, shows every actor again (`0x80014dfc`). The flag is tested only where `Bodies.Render` (`0x80013dcc`) draws a body's own scene, and only while a cut-scene plays (`CutScene.Playing`, `0x800dfe14`, at `0x8001403C`–`0x80014058`); what it holds is drawn after that test (body `+0x730`), and the shadows (`Shadows.Render`, `0x80012358`, from `RenderZones` before the bodies) test only the body's slot, its distance from the aim and its own alpha (`+0x70C`), which a hide leaves alone. So the camera at an actor's eyes sees its shadow beneath it, as the port draws it (`CutSceneActorView`): the point-of-view shots of Pochanargat's (`aidyn:dialogue/0x04FD`) and Phelan's (`0x04FE`) scenes have one. The user saw such a shadow with no body over it late in the game and confirmed from footage of the original that it's drawn there too (Oct 24, 2026).
 - **A move with no reference point goes to the focus itself**: `processVoxelCamera` takes 0.5 off for the missing player and adds 0.5 back in a dialogue.
 - **Several at once.** Up to seven (the eighth crashes), stepped in slot order, the last freed taken first, each writing the camera. A cut is done the step after it starts; an ease ends on its goal. The script's first nodes start their cuts together with any pan after them, which takes its first step in the same tick.
 - **Nothing else moves the camera.** While a move holds it, the follow camera's mode is 2 and does nothing; once the last is freed, the camera's focus is cleared, so the follow camera doesn't run at all. The camera stays where the last move left it. Camera objects don't run in a cut-scene.

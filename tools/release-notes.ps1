@@ -38,10 +38,10 @@ function Get-Headline([string]$subject) {
 }
 
 $lines = [System.Collections.Generic.List[string]]::new()
-$lines.Add("An early build of HBHT: expect rough edges. HBHT doesn't include the game. When it first runs, you import your own ROM of Aidyn Chronicles: The First Mage.")
+$lines.Add("An early build of Aidyn Renewed: expect rough edges. Aidyn Renewed doesn't include the game. When it first runs, you import your own ROM of Aidyn Chronicles: The First Mage.")
 $lines.Add('')
-$lines.Add('**Windows:** the `.msi` installs HBHT for everyone on the PC. The `-portable.zip` runs from wherever you unzip it and keeps its data there. ' +
-    '**Linux:** unpack the `.tar.gz` and run `hbht`. ' +
+$lines.Add('**Windows:** the `.msi` installs Aidyn Renewed for everyone on the PC. The `-portable.zip` runs from wherever you unzip it and keeps its data there. ' +
+    '**Linux:** unpack the `.tar.gz` and run `aidyn-renewed`. ' +
     "**macOS:** open the ``.dmg`` and drag both apps to Applications. They aren't notarized, so macOS asks before it opens them the first time: [what to do]($RepositoryUrl/blob/v$Version/docs/systems/releases.md#macos).")
 $lines.Add('')
 

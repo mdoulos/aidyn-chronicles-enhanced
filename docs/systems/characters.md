@@ -1,6 +1,6 @@
 # Characters (roadmap 2.2)
 
-`HBHT.Core.Characters`: `Character` (the sheet, with its effects in `Character.Effects.cs`), `CharacterStats` and `CharacterSkills`, `CharacterRules` (the records' numbers: caps, prices, experience), `Training`, `Party` (the slots, the gold, the checks; its items in `Party.Items.cs`, [items](items.md)) and `CharacterSaves` (a sheet to and from a save, [saves](saves.md)). The entity DB's layout is in [db](../formats/db.md).
+`AidynRenewed.Core.Characters`: `Character` (the sheet, with its effects in `Character.Effects.cs`), `CharacterStats` and `CharacterSkills`, `CharacterRules` (the records' numbers: caps, prices, experience), `Training`, `Party` (the slots, the gold, the checks; its items in `Party.Items.cs`, [items](items.md)) and `CharacterSaves` (a sheet to and from a save, [saves](saves.md)). The entity DB's layout is in [db](../formats/db.md).
 
 They port the original's `CharStats` (`stats.cpp`), `CharSkills` (`skills.cpp`), the sheet's hit points and experience (`entity.cpp`, `entityInfo.cpp`), the party's checks (`party.cpp`) and the training screens (`StatTrain.cpp`, `SkillTrain.cpp`, `WidgetSpellTrain.cpp`). The price functions and tables are the same in 1.0 and the debug build.
 
@@ -8,9 +8,9 @@ They port the original's `CharStats` (`stats.cpp`), `CharSkills` (`skills.cpp`),
 
 - **Entities** (`aidyn:entity/0x…`) carry the character sheet each starts with: category, aspect, school, True Name and heavy, level, attributes, skills, weapon skills and shield skill, spells at their levels, three weapon slots, armor and shield, protection, damage, morale, resistances, the experience it's worth, its loot category and its trek perception. A skill it can never learn is left out (null); the ROM's byte for it is 255. Resistances are damage multipliers (the ROM's byte in quarters), and those with no element are dropped, as combat ignores them. Alaron's has `trueNameFlag` 590 (below).
 - **Spells** (`aidyn:spell/0x…`) carry the spell DB's fields. Their training cost is the ROM's byte × 50 (`TempSpell::Init`).
-- **Stats** (`aidyn:stat/0`–`6`): Intelligence, Willpower, Dexterity, Endurance, Strength, Stamina and Level, with their names and descriptions from the string tables, their base caps (`base_stat_cap`), caps (`modded_stat_cap`) and training costs (`stat_multiplier`). The Level has no description or cost: only experience raises it.
+- **Stats** (`aidyn:stat/0`–`6`): Intelligence, Willpower, Dexterity, Endurance, Strength, Stamina and Level, with their names and descriptions from the string tables, their base caps (`CodeTable.StatCaps`), caps (the table after it, `0x800e3000`) and training costs (`CodeTable.StatTrainingCosts`). The Level has no description or cost: only experience raises it.
 - **Skills** (`aidyn:skill/0`–`11`) and **weapon skills** (`aidyn:weaponskill/0`–`10` by weapon class, and `11` the shield), with names, descriptions, training costs and the caps 10 and 15 (`SKILLMAXBASE`, `SKILLMAXMOD`). Merchant costs 750 and Ranger 1000. The six monster weapon classes cost nothing and have no description; the shield's name and cost (500) are literals in code.
-- **Progression** (`aidyn:progression/0`): the experience each level starts at (`EXP_TNL`, levels 0–40), the award multiplier (1.5), the training prices and the flag the first spell learnt at a trainer sets (3611).
+- **Progression** (`aidyn:progression/0`): the experience each level starts at (`CodeTable.LevelExp`, levels 0–40), the award multiplier (1.5), the training prices and the flag the first spell learnt at a trainer sets (3611).
 
 The tables are read from the code segment for each ROM version; the literals are facts from the code (see the [hardcoded-content audit](../hardcoded-content.md#characters)).
 
@@ -120,6 +120,6 @@ Scripts add and take away members (Borg13 ops 47 and 48), and `GameState.AddMemb
 
 ## Deaths
 
-- **The died flags** (`Party.SyncMemberFlags`, `0x80074A4C`, the decomp's `Party::CheckDeaths`) are set for each dead member and cleared for each living one, at each party member's death in battle and as a battle ends (`GameState.WriteDeathFlags`). Sholeh's, 622, is also set at her death whatever her side, the combat record's ally ([combat](combat.md#deaths)).
+- **The died flags** (`Party.SyncMemberFlags`, `0x80074A4C`) are set for each dead member and cleared for each living one, at each party member's death in battle and as a battle ends (`GameState.WriteDeathFlags`). Sholeh's, 622, is also set at her death whatever her side, the combat record's ally ([combat](combat.md#deaths)).
 - **The dead leave the party** as every battle ends, won, lost or fled (`Party.AfterBattle`, `0x80074EE8`; `GameState.BringOutYourDead`): each, in order, has any kept sheet of theirs erased and what they wear put in the inventory, as a member leaving does, and the rest move up. Their joined flag stays set and their left flag clear, so the story still counts them as having joined. The port keeps only the sheets of those who left, so a member in the party has none to erase.
 - **The award** after a battle won is the whole experience pool to each living member (`Character.AddExp`, × 1.5): a dead member gains nothing ([combat](combat.md#a-turn)).

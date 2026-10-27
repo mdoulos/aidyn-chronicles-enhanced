@@ -1,6 +1,6 @@
 # Items and inventory (roadmap 2.3)
 
-`HBHT.Core.Items`, and the party's side in `Party.Items.cs` (equipping, taking items for scripts, reading a scroll). The DB tables' layouts are in [db](../formats/db.md); the tables in code are read by `ItemTables` (`HBHT.Rom.Engine`). The menus are in [ui](ui.md).
+`AidynRenewed.Core.Items`, and the party's side in `Party.Items.cs` (equipping, taking items for scripts, reading a scroll). The DB tables' layouts are in [db](../formats/db.md); the tables in code are read by `ItemTables` (`AidynRenewed.Rom.Engine`). The menus are in [ui](ui.md).
 
 - `ItemCatalog`: every item the rules can name (`Item`, whichever record it comes from) and the inventory's rules. `ItemInstance`: one held item, with its battery and charges.
 - `Equipment`: what a character wears and wields, and what that does to the sheet.
@@ -12,10 +12,10 @@ The original's files these port: `item.cpp`, `generic.cpp`, `armor.cpp`, `weapon
 ## The records
 
 - **Weapons** (`aidyn:weapon/0x07…`), **armor** (`aidyn:armor/0x05…`, shields `0x06…`) and **items** (`aidyn:item/…`, everything else, potions among them) carry their DB fields, an icon and what they do for whoever wears them (`GearBonuses`): an aspect only that aspect can wear, a stat and a skill they raise or lower, a spell the wearer can cast from them (level and charges), an enchantment that's on while they're worn, and a resistance.
-  - A weapon's spell level is its own field (the ROM's byte at `0x1D`); armor's and gear's is in the bonuses. The bonuses' first spell byte is the charges for all three (`malloc_equip_spell`).
+  - A weapon's spell level is its own field (the ROM's byte at `0x1D`); armor's and gear's is in the bonuses. The bonuses' first spell byte is the charges for all three.
   - Range is the ROM's byte × 5 / 3, up to 255 (`WeaponDB::Load`).
   - Armor's Dexterity and Stealth are signed: penalties, or Stealth bonuses on leathers. Gear's stat byte is tested against `0xFF`, not for nonzero (`ItemInstance::InitGear`). The spell bytes are in [db](../formats/db.md).
-  - Potions aren't in the item DB. Potion *n* (`aidyn:item/0x10nn`) is named by line *n* of its own string table and priced by a table in code (`potion_prices`); all share one icon. Drinking one is [below](#potions); what each does is its effects ([magic](magic.md#potions-and-flasks)).
+  - Potions aren't in the item DB. Potion *n* (`aidyn:item/0x10nn`) is named by line *n* of its own string table and priced by a table in code (`CodeTable.PotionPrices`); all share one icon. Drinking one is [below](#potions); what each does is its effects ([magic](magic.md#potions-and-flasks)).
   - The Archmage Staff is `fixed`: once equipped it can't be taken off. Niesen's entity has it as its sole weapon (`EntityRecord.SoleWeapon`), the only weapon he can equip.
 - **Traits.** `ownSlot`: the item has an inventory slot of its own rather than one of the 128 general ones (reagents, hides, scrolls, potions, the key items and 13 unique pieces of gear). `mustTake`: loot can't be left behind while it holds the item (21 quest items and keys). Key items carry the flags they set (`keyItem`): `held` while the party has one, and a world map `region` they reveal.
 - **Loot tables** (`aidyn:loot/0x08…`): gold, the chances an enemy drops its armor, shield and weapons, a reagent roll, and six item rolls. Only the first two rolls give a count between bounds. An empty roll still rolls its chance.
@@ -91,7 +91,7 @@ The shop's window is in [ui](ui.md#the-shop).
 
 ## Containers
 
-`Container` is a chest, sack, crate or barrel, or a herb, spice or gem source, as it is in the world (`loot_func`). Using it:
+`Container` is a chest, sack, crate or barrel, or a herb, spice or gem source, as it is in the world (`MapObjectUse.Loot`, `0x800105ec`). Using it:
 
 1. Once its opened or exploded flag is set, it's gone. (Without an opened flag, the original remembers it for a while in its `VoxelChart`, which is the runtime's.)
 2. A **source** gives the reagent of its kind (a herb source herbs, a spice source spice): its count, which the map holds as gold, times the Ranger's share, truncated to a byte and at least 1. The share is rolled as the chunk's objects are set up: the best Ranger's Intelligence + Ranger × 7, times d100 / 100, from 0 to 1 (`Party::HarvestSkill`). So the Ranger skill brings the count up to the source's own.

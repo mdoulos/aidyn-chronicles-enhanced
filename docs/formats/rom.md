@@ -8,7 +8,7 @@ What the three ROMs share, where they differ, and how the Borg archive is stored
 | --- | --- |
 | `0x0001000`–`0x00E7220` | Code segment. It also holds data tables, such as the per-map-set chunk lists and the dialogue SFX tables ([hardcoded content](../hardcoded-content.md)). |
 | `0x00E7220`–`0x1F89C10` | **Borg archive**: about 30 MB holding every art, level, audio and dialogue asset. |
-| `0x1F89C10` | `Borg_List`: the archive index. Each entry has type, compression, compressed and uncompressed sizes, and offset. |
+| `0x1F89C10` | The archive index. Each entry has type, compression, compressed and uncompressed sizes, and offset. |
 | `0x1FC2BB0`–`0x1FEEFD0` | Fixed databases ([db](db.md)): Entity, Weapon, Armor, Spell, Item, Chest, DialogEntity, GameStateMod, GameStateFunnel, Audiokey, Journal, Theatre menu, cinematic text, controller and combat strings, CampEncounters, cheats, credits, and the item, stat and spell string tables. |
 
 Compression comes in two schemes, LZB (most Borgs) and LZ01x (text), and strings also go through a decrypt step ([text](text.md)).
@@ -35,13 +35,13 @@ Compression comes in two schemes, LZB (most Borgs) and LZ01x (text), and strings
 
 1.1 is a real second revision, and 1.0 is the primary target. Compared with 1.0:
 
-- **Borg archive and `Borg_List`:** byte-identical, moved (see the table below).
+- **Borg archive and archive index:** byte-identical, moved (see the table below).
 - **Code segment:** changed (about 760k bytes differ even after allowing for the move). Its data is 1.0's, moved.
 - **DB block:** every record is identical. The only change is new text: five Controller Pak error messages appended to `String/Common` and four to `String/Controller`, which grew and move everything after them.
 
 So 1.1 has code fixes and a few new messages, and all assets and records are shared.
 
-The debug ROM's Borg archive and `Borg_List` are 1.0's too, and its DB block is 1.0's but for its credits, which are shorter (three names missing, one date different). Its code segment is a different build.
+The debug ROM's Borg archive and archive index are 1.0's too, and its DB block is 1.0's but for its credits, which are shorter (three names missing, one date different). Its code segment is a different build.
 
 ## Where each version has its tables
 
@@ -52,7 +52,7 @@ The debug ROM's Borg archive and `Borg_List` are 1.0's too, and its DB block is 
 | `0x008BAC4` | `-0xC4` | Code, through the spell visuals' refused and resisted actors |
 | `0x008D710` | `-0xB4` | The spell visuals' functions |
 | `0x008DDE4` | `-0x10` | The rest of the code, and the data up to the fonts |
-| `0x00DAF08` | `+0x40` | The data from the fonts on, the Borg archive, `Borg_List`, and the DB block to `String/Common`, which grew from `0x2830` bytes to `0x2960` |
+| `0x00DAF08` | `+0x40` | The data from the fonts on, the Borg archive, the archive index, and the DB block to `String/Common`, which grew from `0x2830` bytes to `0x2960` |
 | `0x1FEA3B0` | `+0x170` | `String/Copyright` to `String/Controller`, which grew from `0x410` bytes to `0x510` |
 | `0x1FED950` | `+0x270` | `String/Combat` to the end |
 
@@ -67,6 +67,6 @@ A new table is one row: its length, 1.0's offset and the debug ROM's. 1.1 needs 
 ## The Borg archive
 
 - **All three ROMs share one Borg archive**, byte for byte, at their own offsets.
-- **The `Borg_List` header** is the entry count followed by the archive's size in bytes, which equals `Borg_List − archive start` in every version.
+- **The archive index's header** is the entry count followed by the archive's size in bytes, which equals the index's offset less the archive's start in every version.
 - **Stored sizes are padded to 8 bytes** with zeros, and entries start on 16-byte boundaries. An LZB stream therefore ends 0–7 bytes before its stored size.
 - **Compression:** a Borg is LZB or stored raw; none uses LZ01x, which only text does. LZB is UCL's NRV2B with an 8-bit bit buffer. LZ01x is LZO1X from LZO 1.06.

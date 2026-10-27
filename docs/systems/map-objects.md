@@ -1,12 +1,12 @@
 # Using map objects (M2)
 
-`HBHT.Core.MapObjects`. What map objects are and how the base plugin holds them is in [maps](../formats/maps.md); the rules for containers, locks and traps are in [items](items.md#containers).
+`AidynRenewed.Core.MapObjects`. What map objects are and how the base plugin holds them is in [maps](../formats/maps.md); the rules for containers, locks and traps are in [items](items.md#containers).
 
-Ported from `objectJumpTables.cpp`, `voxObjects.cpp`, `voxObjects2.cpp` (`obj_ref_func`), `voxelProcess.cpp` (`ProcessVoxelObjects`), `lockpick.cpp`, `trapmenu.cpp` and the zone engine's `check_trigger` and `TeleportPlayer`.
+Ported from `objectJumpTables.cpp`, `voxObjects.cpp`, `voxObjects2.cpp` (`MapObjectUse.Reach`), `voxelProcess.cpp` (`ProcessVoxelObjects`), `lockpick.cpp`, `trapmenu.cpp` and the zone engine's trigger triangles (`MapObjectUse.Tread`) and `TeleportPlayer`.
 
 ## A chunk's objects at run time
 
-`LoadedMap` is a chunk's objects while it's loaded, as the original's `Borg9Data` is: which are active, its containers' and teleporters' locks and traps, and which model each container shows. Loading the chunk activates its objects by the flags (`VoxelObjects_Activate`), and what using them changes lasts until it's loaded again.
+`LoadedMap` is a chunk's objects while it's loaded, as the original's `Borg9Data` is: which are active, its containers' and teleporters' locks and traps, and which model each container shows. Loading the chunk activates its objects by the flags (`LoadedMap.Activate`, `0x80017af8`), and what using them changes lasts until it's loaded again.
 
 - **Active** objects are those there by their flags ([maps](../formats/maps.md#map-objects-in-the-base-plugin-06)) and not only for a console without the Expansion Pak. Using a container, or a trap going off, makes it inactive.
 - **A chest, sack, crate or barrel** found opened, by its flag or because it's remembered as emptied ([saves](saves.md)), loads inactive with no lock, trap or gold, its model showing it opened; found destroyed, its model shows that. Its model is there either way. A herb, spice, gem or custom container's model is there only while the container is.
@@ -19,11 +19,11 @@ Ported from `objectJumpTables.cpp`, `voxObjects.cpp`, `voxObjects2.cpp` (`obj_re
 
 ## What A reaches
 
-`MapObjectUse.Reach` (`obj_ref_func`): of the objects the grid cell under the player lists ([maps](../formats/maps.md#collision-the-grid-and-placement-1c)), the active ones that aren't tangible and that the player is within reach of by each type's test, up to 16:
+`MapObjectUse.Reach` (`0x80004654`): of the objects the grid cell under the player lists ([maps](../formats/maps.md#collision-the-grid-and-placement-1c)), the active ones that aren't tangible and that the player is within reach of by each type's test, up to 16:
 
 | Type | In reach |
 | --- | --- |
-| Container | Within its reach plus the player's radius (0.5), from the player's centre in 3D: 2.5 for most. Its reach isn't its radius, which is 10 for most (see [maps](../formats/maps.md#map-objects-in-the-base-plugin-06)). Then a herb, spice, gem or custom container always; a chest, sack, crate or barrel only until opened, and only if it holds gold, a loot table or an item (`container_obj_check`) |
+| Container | Within its reach plus the player's radius (0.5), from the player's centre in 3D: 2.5 for most. Its reach isn't its radius, which is 10 for most (see [maps](../formats/maps.md#map-objects-in-the-base-plugin-06)). Then a herb, spice, gem or custom container always; a chest, sack, crate or barrel only until opened, and only if it holds gold, a loot table or an item |
 | Teleporter, trigger, dialogue | Within its radius, while its Enabled holds |
 | Save point | Within its radius, and using it does nothing |
 | Monster party | Only the player's nearest body, if it's a wanderer's and its party isn't silent: within the two bodies' scaled radii plus 0.5 across the ground, and less than 2 apart in height. It's weighed by that distance and its body's position. See [wanderers](wanderers.md#talking) |
@@ -41,13 +41,13 @@ One alone is used. Of several, the one with the best (farthest − its distance)
 `MapObjectUse.Cameras.cs`; what a camera object does to the camera is in [cameras](cameras.md#camera-objects-processvoxelcamera). There are 244, reached two ways, and none both:
 
 - **182 the grid lists,** each with a radius under 200. Each tick, before the camera steps (`ProcessVoxelObjects`), those the player's grid cell lists take the camera while he's within their radius and they're active. They're mostly one to a room: each of Gwernia's houses has one that covers it, cutting to a point near the ceiling and tracking him.
-- **62 trigger triangles name,** 1,532 triangles between them. Each sits at its chunk's origin with a radius of 200, and no cell lists it. Touching one of its triangles (`set_camera_voxel_pointer`) gives the camera to it for 60 ticks, counting that one, and each touch starts the count again; it steps after the player moves (`ProcessScriptCamera`). A later triangle's camera takes over from an earlier one's, and going through a teleporter lets go (`clear_camera_voxel_pointer`). Gwernia's inn has four, which ease from point to point as he crosses it.
+- **62 trigger triangles name,** 1,532 triangles between them. Each sits at its chunk's origin with a radius of 200, and no cell lists it. Touching one of its triangles gives the camera to it for 60 ticks, counting that one, and each touch starts the count again; it steps after the player moves (`ProcessScriptCamera`). A later triangle's camera takes over from an earlier one's, and going through a teleporter lets go. Gwernia's inn has four, which ease from point to point as he crosses it.
 
 216 move the camera or its aim to a reference point in their own map; the other 28 set how the outdoor camera follows. The original looks the reference point up in the chunk the player is in, and the port in the camera's own, as for trigger triangles. Camera objects work under popups, as the original runs `ProcessVoxelObjects` then; that a trigger triangle's does too is a guess. They work through a teleport's fade too, when nothing else does ([cameras](cameras.md#which-mode)). Teleporters' camera points are where a teleport puts the camera ([cameras](cameras.md#which-mode)); a house's door names the same point its room's camera cuts to.
 
 ## Triggers
 
-`MapObjectUse.Trigger` (`trigger_vobject_func`, `0x80010bc4`): SetFlag sets its flag; Animate asks the actor its model links to for an animation; ChangeCollision changes its map's toggles with its id, ANDing their flags with one value and ORing in another. Then the trigger writes its Used flag.
+`MapObjectUse.Trigger` (`0x80010bc4`): SetFlag sets its flag; Animate asks the actor its model links to for an animation; ChangeCollision changes its map's toggles with its id, ANDing their flags with one value and ORing in another. Then the trigger writes its Used flag.
 
 **ChangeCollision** walks the triangles of the chunk the player is in (`Zones.PlayerMap`, `0x800d8288`: its count at `+0x24`, its 32-byte triangles at `+0x3c`), and changes those whose role (`+0x1e & 0xF000`) is `0x1000`, a toggle, and whose id (`+0x1e >> 5 & 0x7F`) is the trigger's (`+0x2c`): the flags at `+0x1c` are ANDed with `+0x2e` and ORed with `+0x30`. They stay so in the loaded Borg9 until the chunk loads again. All nine in the base game keep every flag and add Passable, so they open a way, and each is tangible with no Used flag, gated on a flag, so it opens the way again on every tick the player is within its radius, each time the chunk loads. They're the game's only barriers of collision a flag opens:
 
@@ -67,7 +67,7 @@ One alone is used. Of several, the one with the best (farthest − its distance)
 
 ## Teleporters
 
-Using a door (`teleporter_func`):
+Using a door (`0x800102c0`):
 
 1. **A secret door** whose secret flag is clear is found: "You've just discovered a secret door!", and the flag is set. Closing the message uses the door again. The eleven are in EhudUnder.
 2. **Its trap**, while it has one and its trap flag is clear, opens the trap's menu, as a container's does (below). A failed disarm hurts the party and goes on through the door; either way, closing the message sets its disarm flag and uses the door again.
@@ -78,7 +78,7 @@ The screen fades out at 2/3 of full brightness a tick, stays black for 3 frames,
 
 ## Containers
 
-Using a container (`loot_func`), once it's neither opened, destroyed nor remembered:
+Using a container (`MapObjectUse.Loot`, `0x800105ec`), once it's neither opened, destroyed nor remembered:
 
 1. **A herb, spice or gem source** gives its reagent ([items](items.md#containers)) in the loot window, writes its Used flag and is used up, with its model. If its gates still held, it would be remembered for a while; none does.
 2. **A custom container** (loot with its own model) writes its Used flag and is inactive before anything else.
@@ -92,7 +92,7 @@ Using a container (`loot_func`), once it's neither opened, destroyed nor remembe
 - **The one that stays** burns 600 ticks, growing its flames by 1. **The three thrown** burn 60, growing theirs by 0.35: each is an emitter that moves itself (emitter flag `0x2000`), a sphere of radius 0.25 leaving the container at 0.036 across the ground every way and 0.12 up, falling at 0.006 a tick² (the pool's one gravity, `0x800d58e4`) and colliding with the world each frame (`ProcessCollisionSphere`), so it rises about 1.2 and lands about 1.5 away, where the ground stops it. Its flames are born where it is, and its light goes with it while it's lit.
 - **The burst** (`Explosion.Burst`, `0x80016c00`): 75 particles of grey (0.35, 0.3, 0.25, 1) at scale 0.25, all at once from the container, every way at 0.04 to 0.06 a tick, falling at 6/7000 a tick², bouncing off the container's height (keeping 0.6), and fading to nothing over 420 ticks (over its life less one, `Particles.InverseLife`). Its light, orange fading to nothing within 10, lasts 120. Side by side with the emulator, the whole explosion looks as the original's.
 
-An emitter the pool has no room for comes without its light. `HBHT.Core.Particles.Explosion` ports it, from `TrekLoop`'s `IMapObjectHost.Explode`; the runtime's `ParticlesView` draws it with the rest of the pool. The pool collides a thrown fire with every loaded chunk's collision (`ParticleHead.World`, which the zone engine gives it), where the original's head holds the one `LoadGameBorgScenes` sets (`+0x338`). With no pool the lights come alone (`DynamicLights.Explosion`).
+An emitter the pool has no room for comes without its light. `AidynRenewed.Core.Particles.Explosion` ports it, from `TrekLoop`'s `IMapObjectHost.Explode`; the runtime's `ParticlesView` draws it with the rest of the pool. The pool collides a thrown fire with every loaded chunk's collision (`ParticleHead.World`, which the zone engine gives it), where the original's head holds the one `LoadGameBorgScenes` sets (`+0x338`). With no pool the lights come alone (`DynamicLights.Explosion`).
 
 ## Map objects write flags
 
@@ -100,9 +100,9 @@ Every flag a map object writes is followed at once by a read of derived flag 562
 
 ## Popups
 
-A popup (`TrekPopup`, over the menus' `MenuMessage` and `MenuChoice`) takes the player's input until it's closed, and stops the clock and the potions working (the sundial is hidden), but not the world (`isPaused`): bodies move, animations and clouds go on, a chasing enemy can keep running into the player, and tangible triggers still go off, while doors and dialogues wait for it to close (`vobject_pause_check`). Wanderers don't choose new goals under it (`WanderTick` is skipped; [wanderers](wanderers.md#wandering-noticing-and-chasing)). Its choice pulses a trek frame at a time, where the menus' step every tick, so it isn't a `MenuOverlay`. `TrekPopupView` draws it on a UI screen of its own, under the pause menu.
+A popup (`TrekPopup`, over the menus' `MenuMessage` and `MenuChoice`) takes the player's input until it's closed, and stops the clock and the potions working (the sundial is hidden), but not the world (`isPaused`): bodies move, animations and clouds go on, a chasing enemy can keep running into the player, and tangible triggers still go off, while doors and dialogues wait for it to close. Wanderers don't choose new goals under it (`WanderTick` is skipped; [wanderers](wanderers.md#wandering-noticing-and-chasing)). Its choice pulses a trek frame at a time, where the menus' step every tick, so it isn't a `MenuOverlay`. `TrekPopupView` draws it on a UI screen of its own, under the pause menu.
 
-- **A message** (`TrekTextPopup`, `TextBox_Centered`): off-white text in a feathered black box at the screen's centre, as wide as the text up to 150, wrapping there, A or B closing it.
+- **A message** (`TrekTextPopup`, `MessagePopup.Create`): off-white text in a feathered black box at the screen's centre, as wide as the text up to 150, wrapping there, A or B closing it.
 - **The trap's damage** (`TrapMenu::TakeDamage`): white, in a box 16 wider than its widest line and as tall as its lines at the first line's height plus 2.
 - **The trap's menu** (`WidgetChoiceDia::Update`): the question above the choices, the cursor's choice pulsing grey to white, the scroll menu's defaults. The stick moves the cursor, A chooses and B leaves.
 

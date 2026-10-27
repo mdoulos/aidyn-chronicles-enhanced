@@ -1,38 +1,43 @@
-# Hoo Boy, Here's Trouble
+# Aidyn Renewed
 
 A PC port of the engine that runs Aidyn Chronicles: The First Mage for the
-Nintendo 64, written in C# and Godot.
+Nintendo 64, written in C# and Godot. It is a fork of
+[HBHT](https://github.com/Aquatakat/hbht), continued under its own name; see
+[Provenance](#provenance).
 
-The goal of the project is a largely console-accurate version of the game, with
-a set of optional enhancements, and a comprehensive mod editor, similar to
-something like OpenMW-CS.
+The goal is a largely console-accurate version of the game, with a set of
+optional enhancements, and a comprehensive mod editor, similar to something
+like OpenMW-CS.
 
 No game content is included. You must bring your own copy of the US 1.0 ROM.
+Not affiliated with H2O Entertainment or THQ; Aidyn Chronicles is their
+trademark.
 
-This project is primarily written by the Claude 5.5 models, directed and
-playtested by me. This readme is human written. Not affiliated with H2O
-Entertainment or THQ, Aidyn Chronicles is their trademark.
-
-## Getting Started
+## Getting started
 
 1. Download the latest release
-2. Run `hbht` or `hbht.exe`
+2. Run `aidyn-renewed` or `aidyn-renewed.exe`
 3. On first run, select your ROM, and decide whether or not you want to fix the
    mushroom (you know the one)
 4. Play
 
+To build from source, install the .NET 10 SDK that `global.json` pins and run
+`dotnet test` from the repository root. `aidyn-renewed import <rom>` imports the
+ROM, and `tools/godot.ps1 --path src/AidynRenewed.Game` runs the game on it.
+[CLAUDE.md](CLAUDE.md) maps the code, the formats, the systems and the docs.
+
 ## Accuracy
 
-This project is not a decomp, it's essentially a clean-room reimplementation of
-the engine in a different language, with the ROM checked generally to answer
-specific questions as to how certain systems function. This gains us a lot of
-flexibility and the ability to expand the game in the future, but loses flawless
-accuracy and requires significantly more testing.
+This project is not a decompilation. It is a clean-room reimplementation of the
+engine in a different language, with the ROM's machine code read to answer
+specific questions about how certain systems function. This gains a lot of
+flexibility and the ability to expand the game in the future, but loses
+flawless accuracy and requires significantly more testing.
 
-The primary goal is a reasonable representation of the game, down to some of its
-weirder quirks, but this is a game limited by its hardware and rushed out the
-door, so some bugs and limitations are corrected at the expense of perfect N64
-accuracy.
+The primary goal is a reasonable representation of the game, down to some of
+its weirder quirks, but this is a game limited by its hardware and rushed out
+the door, so some bugs and limitations are corrected at the expense of perfect
+N64 accuracy.
 
 Timing is a big one. A lot of effects in the game (weather, animated textures,
 some RNG) are directly tied to framerate, so the speed could vary. On a modern
@@ -46,7 +51,7 @@ Examples of some fixed bugs:
 - Weather continues from trek mode into cutscenes rather than reverting to clear
   and restarting.
 - The time of day and compass are meant to be hidden inside some interiors. The
-  original shows them when you load a save inside, HBHT hides them.
+  original shows them when you load a save inside; this port hides them.
 
 The type of things not fixed:
 - Rain and splash density stays pretty low by default.
@@ -76,37 +81,33 @@ there is an inspector and a map/dialogue viewer.
 | --- | --- |
 | Trek | ✅ Complete, tested in a variety of situations. There's probably some odd edge cases left. |
 | Quest progression | ✅ A full playthrough revealed no quest progression or flag-related bugs. The side quests (Gwernia's Inn, Elisheva's Tomb, etc.) have not been tested yet. Some content-related bugs are left unfixed, leaving them for the mod editor (talking to Keelin in Terminor from certain angles loads the wrong set of camera positions). |
-| Cut-scenes | ⚠️ All story cut-scenes play through with no game-breaking issues. Some edge cases involving differences between HBHT and the original cause some cut-scenes to play out better (Niesen no longer faces the wrong way during the Fire Lord cutscene) and some to play out worse (Shamsuk sometimes doesn't stand in the correct spot in the scene prior to his fight). A full test of all cut-scenes is required. |
+| Cut-scenes | ⚠️ All story cut-scenes play through with no game-breaking issues. Some edge cases involving differences between the port and the original cause some cut-scenes to play out better (Niesen no longer faces the wrong way during the Fire Lord cutscene) and some to play out worse (Shamsuk sometimes doesn't stand in the correct spot in the scene prior to his fight). A full test of all cut-scenes is required. |
 | Combat | ⚠️ Combat has been fully implemented, but only basic combat has been thoroughly tested (Alaron vs rats and bats in the intro). A full test of all spell types in various scenarios is required. |
 | Menu | ✅ Complete |
 | Editor | ⏳ An inspector is available for in-game maps, characters, scenes, dialogue. Editing hasn't been started yet. Some systemic changes need to happen first - custom fights like the Goblin ambush, that whole weird thing with Sholeh, and the Shadow should be reimplemented as scripts rather than being hardcoded. |
 
-## Credits
+## Provenance
 
-### [AidynEditor](https://github.com/TiberGuy/AidynEditor) (MIT licensed)
+Aidyn Renewed was forked on October 27, 2026 from
+[HBHT](https://github.com/Aquatakat/hbht) (Hoo Boy, Here's Trouble) by
+Aquatakat, at its commit 6ec85b3, under the MIT license. HBHT's code was
+written mostly by Claude models under its author's direction and playtesting,
+and that is true of the code here. The fork keeps HBHT's git history, its
+architecture decision records in their own words, and the upstream copyright
+notice in [LICENSE](LICENSE) as the record of where the work came from. Its
+name, packages, docs and the names its code cites are its own
+([ADR 0030](docs/adr/0030-the-project-is-aidyn-renewed.md)).
 
-Used to cross-check the database's fields, thank you.
+### Credits
 
-### [Aidyn Chronicles Decompilation](https://github.com/blackgamma7/Aidyn)
-
-At the beginning of the project, the Aidyn decomp was used as a springboard
-to see how viable this project even was. We copied no code from it, but mirrored
-some of its file/class structure, and used it as a map to the machine code in
-the ROM before checking its assertions against the machine code. I'd like to
-thank blackgamma7 for their work in reverse-engineering the game.
-
-I failed to do my due diligence about whether or not its author would object to
-an AI-written project using their work this way. On October 4, 2026, I read the
-author's public comments about AI-written projects and decided to
-[halt all reading of their code](docs/adr/0015-the-port-no-longer-reads-the-decomp.md)
-and stop using their symbol table for future commits.
-
-Unfortunately, for past commits, we've already opened the box and peeked inside.
-I've decided to not reimplement everything we had done so far, especially
-because the code as-written is mostly derived from reading the machine code.
-Instead, I'd like to extend this public apology, and just add that this project
-exists for the love of this very weird, janky, ambitious game - I don't mean to
-take away from the decomp's work, or the art of decompilation in general.
+- [AidynEditor](https://github.com/TiberGuy/AidynEditor) (MIT licensed): used
+  to cross-check the database's fields.
+- Early in HBHT's life, a community decompilation of the game served as a map
+  to the ROM's machine code. No code was copied from it, HBHT stopped reading
+  it on October 4, 2026
+  ([ADR 0015](docs/adr/0015-the-port-no-longer-reads-the-decomp.md)), and this
+  project cites none of its names. Everything the port relies on was settled
+  from the ROM's machine code, its data and the emulator.
 
 ## License
 

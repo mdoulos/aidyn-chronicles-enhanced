@@ -1,9 +1,9 @@
 # Build the release packages for the machine it runs on (docs/systems/releases.md).
 # Usage: tools/package.ps1 [-Version <n>] [-OutDir <folder>]
 #
-#   Windows: HBHT-alpha-<n>-windows.msi and HBHT-alpha-<n>-windows-portable.zip
-#   Linux:   HBHT-alpha-<n>-linux-x86_64.tar.gz
-#   macOS:   HBHT-alpha-<n>-macos.dmg
+#   Windows: AidynRenewed-alpha-<n>-windows.msi and AidynRenewed-alpha-<n>-windows-portable.zip
+#   Linux:   AidynRenewed-alpha-<n>-linux-x86_64.tar.gz
+#   macOS:   AidynRenewed-alpha-<n>-macos.dmg
 #
 # It fetches the pinned Godot and its export templates into .tools/ (tools/godot-pin.ps1),
 # exports both Godot projects with release templates, lays them out side by side and
@@ -28,13 +28,13 @@ $repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if (-not $OutDir) { $OutDir = Join-Path $repo 'out/packages' }
 $OutDir = [IO.Path]::GetFullPath($OutDir)
 $platform = Get-HostPlatform
-$name = "HBHT-alpha-$Version"
+$name = "AidynRenewed-alpha-$Version"
 $work = Join-Path $OutDir "work-$platform"
 
 # The two apps: the Godot project, the executable (and PCK) name, the macOS bundle name.
 $apps = @(
-    @{ Project = 'HBHT.Game';   Exe = 'hbht';        Bundle = 'HBHT' }
-    @{ Project = 'HBHT.Editor'; Exe = 'hbht-editor'; Bundle = 'HBHT Editor' }
+    @{ Project = 'AidynRenewed.Game';   Exe = 'aidyn-renewed';        Bundle = 'Aidyn Renewed' }
+    @{ Project = 'AidynRenewed.Editor'; Exe = 'aidyn-renewed-editor'; Bundle = 'Aidyn Renewed Editor' }
 )
 
 function Invoke-Native([string]$exe, [string[]]$arguments) {
@@ -111,13 +111,13 @@ function Export-App($app, [string]$preset, [string]$target) {
         # the .ico and .icns are only needed here, and are gitignored.
         $branding = Join-Path $repo 'assets/branding'
         Copy-IfChanged (Join-Path $branding 'logo.png') (Join-Path $dir 'icon.png')
-        foreach ($icon in @(@('hbht.ico', 'icon.ico'), @('hbht.icns', 'icon.icns'))) {
+        foreach ($icon in @(@('aidyn-renewed.ico', 'icon.ico'), @('aidyn-renewed.icns', 'icon.icns'))) {
             $to = Join-Path $dir $icon[1]
             if (-not (Test-Path -LiteralPath $to)) { $created += $to }
             Copy-Item -LiteralPath (Join-Path $branding $icon[0]) -Destination $to -Force
         }
         # Godot's .NET export insists on <assembly>.sln beside the project, though it
-        # publishes the .csproj; the repository's solution is HBHT.slnx at the root.
+        # publishes the .csproj; the repository's solution is AidynRenewed.slnx at the root.
         $sln = Join-Path $dir "$($app.Project).sln"
         if (-not (Test-Path -LiteralPath $sln)) {
             $created += $sln
@@ -170,7 +170,7 @@ function ConvertTo-Rtf([string]$text) {
 }
 
 function New-WindowsPackages {
-    $stage = Join-Path $work 'HBHT'
+    $stage = Join-Path $work 'AidynRenewed'
     Reset-Folder $stage
     foreach ($app in $apps) {
         Export-App $app 'Windows Desktop' (Join-Path $stage "$($app.Exe).exe")
@@ -189,7 +189,7 @@ function New-WindowsPackages {
     $archive = [IO.Compression.ZipFile]::Open($zip, [IO.Compression.ZipArchiveMode]::Update)
     try {
         $writer = New-Object IO.StreamWriter($archive.CreateEntry('portable.txt').Open())
-        $writer.Write("This file makes HBHT portable: while it is here, HBHT keeps its data (the imported game, saves and settings) in the data folder beside it instead of %LOCALAPPDATA%\HBHT.`r`n")
+        $writer.Write("This file makes Aidyn Renewed portable: while it is here, Aidyn Renewed keeps its data (the imported game, saves and settings) in the data folder beside it instead of %LOCALAPPDATA%\AidynRenewed.`r`n")
         $writer.Dispose()
     } finally {
         $archive.Dispose()
@@ -209,14 +209,14 @@ function New-WindowsPackages {
     try {
         $wixVersion = (& dotnet wix --version).Split('+')[0]
         Invoke-Native dotnet @('wix', 'extension', 'add', "WixToolset.UI.wixext/$wixVersion")
-        Invoke-Native dotnet @('wix', 'build', (Join-Path $repo 'packaging/windows/HBHT.wxs'),
+        Invoke-Native dotnet @('wix', 'build', (Join-Path $repo 'packaging/windows/AidynRenewed.wxs'),
             '-arch', 'x64', '-ext', 'WixToolset.UI.wixext',
             '-d', "Version=$Version.0.0",
             '-d', "AppDir=$stage",
             '-d', "LicenseRtf=$rtf",
-            '-d', "Icon=$(Join-Path $repo 'assets/branding/hbht.ico')",
+            '-d', "Icon=$(Join-Path $repo 'assets/branding/aidyn-renewed.ico')",
             '-intermediatefolder', (Join-Path $work 'wixobj'),
-            '-pdb', (Join-Path $work 'HBHT.wixpdb'),
+            '-pdb', (Join-Path $work 'AidynRenewed.wixpdb'),
             '-o', $msi)
     } finally { Pop-Location }
     Write-Host "Wrote $msi"
@@ -253,8 +253,8 @@ function New-MacPackage {
         $bundle = Join-Path $stage "$($app.Bundle).app"
         Move-Item -LiteralPath $exported[0].FullName -Destination $bundle
 
-        # Godot names the executable and the PCK after the project ("HBHT Editor");
-        # the packages name them hbht and hbht-editor, as on Windows and Linux. The
+        # Godot names the executable and the PCK after the project ("Aidyn Renewed Editor");
+        # the packages name them aidyn-renewed and aidyn-renewed-editor, as on Windows and Linux. The
         # engine finds the PCK by the executable's name, in Contents/Resources.
         $contents = Join-Path $bundle 'Contents'
         $binary = @(Get-ChildItem -LiteralPath (Join-Path $contents 'MacOS') -File)
@@ -282,7 +282,7 @@ function New-MacPackage {
     if (Test-Path -LiteralPath $dmg) { Remove-Item -LiteralPath $dmg }
     # hdiutil now and then fails with "Resource busy" on a busy machine; a retry clears it.
     foreach ($attempt in 1..3) {
-        & hdiutil create -volname "HBHT alpha $Version" -srcfolder $stage -ov -format UDZO $dmg
+        & hdiutil create -volname "Aidyn Renewed alpha $Version" -srcfolder $stage -ov -format UDZO $dmg
         if ($LASTEXITCODE -eq 0) { break }
         if ($attempt -eq 3) { throw "hdiutil create exited with $LASTEXITCODE" }
         Start-Sleep -Seconds 5

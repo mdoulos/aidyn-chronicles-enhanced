@@ -1,0 +1,28 @@
+; Engine configuration file.
+
+config_version=5
+
+[application]
+
+config/name="Aidyn Renewed"
+run/main_scene="res://Main.tscn"
+config/version="0"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+config/icon="res://icon.png"
+
+[dotnet]
+
+project/assembly_name="AidynRenewed.Game"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=960
+
+[physics]
+
+common/physics_interpolation=true
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

@@ -1,13 +1,13 @@
-#:project ../../src/HBHT.Core/HBHT.Core.csproj
+#:project ../../src/AidynRenewed.Core/AidynRenewed.Core.csproj
 #:property PublishAot=false
 using System.Globalization;
 using System.Numerics;
-using HBHT.Core;
-using HBHT.Core.Chunks;
-using HBHT.Core.Physics;
-using HBHT.Plugins;
-using HBHT.Plugins.Records;
-using HBHT.Plugins.Saves;
+using AidynRenewed.Core;
+using AidynRenewed.Core.Chunks;
+using AidynRenewed.Core.Physics;
+using AidynRenewed.Plugins;
+using AidynRenewed.Plugins.Records;
+using AidynRenewed.Plugins.Saves;
 
 // Edits a save for a user check:
 //   dotnet run tools/saves/edit.cs -- <in.json> <out.json> [--label <text>] [--at <mapset> <chunk> <x> <z> [<y>]] [--face <x> <z>]

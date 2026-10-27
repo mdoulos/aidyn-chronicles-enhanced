@@ -1,9 +1,9 @@
-#:project ../../src/HBHT.Core/HBHT.Core.csproj
+#:project ../../src/AidynRenewed.Core/AidynRenewed.Core.csproj
 #:property PublishAot=false
 using System.Globalization;
-using HBHT.Core;
-using HBHT.Plugins;
-using HBHT.Plugins.Saves;
+using AidynRenewed.Core;
+using AidynRenewed.Plugins;
+using AidynRenewed.Plugins.Saves;
 
 // Prints flags as a save loads them: dotnet run tools/saves/flags.cs -- <save.json> <n,...>
 var game = GameState.Load(PluginSet.LoadInstalled(DataPaths.Plugins), SaveFile.Read(args[0]));

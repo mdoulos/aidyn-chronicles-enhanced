@@ -1,10 +1,10 @@
-#:project ../../src/HBHT.Core/HBHT.Core.csproj
+#:project ../../src/AidynRenewed.Core/AidynRenewed.Core.csproj
 #:property PublishAot=false
 using System.Globalization;
-using HBHT.Core;
-using HBHT.Plugins;
-using HBHT.Plugins.Records;
-using HBHT.Plugins.Saves;
+using AidynRenewed.Core;
+using AidynRenewed.Plugins;
+using AidynRenewed.Plugins.Records;
+using AidynRenewed.Plugins.Saves;
 
 // Changes a save's party by the scripts' own ops, so the party's flags follow:
 //   dotnet run tools/saves/party.cs -- <in.json> <out.json> [--remove <entity hex,...>] [--add <entity hex,...>]

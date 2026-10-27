@@ -10,7 +10,7 @@ It describes systems and rules, not specific content. Spell lists, item tables, 
 
 Treat this document as generally correct as far as being a broad overview, but it's written from memory, so some specific details may be incorrect.
 
-Details marked **(decomp)** were checked against the [blackgamma7/Aidyn](https://github.com/blackgamma7/Aidyn) decompilation (Sep 26, 2026) rather than observed in play. They reflect what the pseudocode says, which is reliable for logic and constants, but they should still be spot-checked in an emulator before the reimplementation depends on them.
+Details marked **(pseudocode)** were checked in early research (Sep 26, 2026) against decompiled pseudocode of the ROM rather than observed in play. They reflect what the pseudocode says, which is reliable for logic and constants, but they should still be confirmed in play or against the machine code before the reimplementation depends on them.
 
 Terminology follows the game where it has its own words: **trek mode** for free exploration, **battle mode** for combat, and **Alaron** for the player character.
 
@@ -36,9 +36,9 @@ The overworld is one seamless worldspace with loading hidden from the player. In
 
 ### Loading
 
-Loading is invisible. **(decomp)** It's chunk streaming, not chokepoints. Each map is a grid of chunks roughly 100 units square, and the engine keeps a 3×3 block of chunks loaded around the player, swapping rows and columns in as the player crosses chunk boundaries. Each chunk has two scene models and one collision-and-objects file.
+Loading is invisible. **(pseudocode)** It's chunk streaming, not chokepoints. Each map is a grid of chunks roughly 100 units square, and the engine keeps a 3×3 block of chunks loaded around the player, swapping rows and columns in as the player crosses chunk boundaries. Each chunk has two scene models and one collision-and-objects file.
 
-**(decomp)** Some world objects exist only when an Expansion Pak is present, and others only when it isn't. A reimplementation should use the Expansion Pak set.
+**(pseudocode)** Some world objects exist only when an Expansion Pak is present, and others only when it isn't. A reimplementation should use the Expansion Pak set.
 
 ### Terrain
 
@@ -48,7 +48,7 @@ Terrain is made of interlocking meshes of varying shapes, including donut shapes
 
 Doors transport the player into interiors instantly, with a very short fade to black.
 
-**(decomp)** Not all interiors are in the overworld. The game is split into 17 map sets:
+**(pseudocode)** Not all interiors are in the overworld. The game is split into 17 map sets:
 
 | Kind | Map sets |
 | --- | --- |
@@ -71,7 +71,7 @@ There are three observable draw distance tiers:
 | Objects | Trees, some buildings | Medium |
 | Actors and containers | NPCs, creatures, chests, herb piles, etc. | Short, sometimes quite short |
 
-**(decomp)** Each placed scene object stores its own draw distance, so the object tier is a content convention rather than a fixed engine setting. Distances are from the player, not the camera, and each model fades over its last unit rather than popping. Chests are drawn to 10, most trees to 40–70. See [rendering](systems/rendering.md#draw-distance).
+**(pseudocode)** Each placed scene object stores its own draw distance, so the object tier is a content convention rather than a fixed engine setting. Distances are from the player, not the camera, and each model fades over its last unit rather than popping. Chests are drawn to 10, most trees to 40–70. See [rendering](systems/rendering.md#draw-distance).
 
 ## Time, weather, and aspect
 
@@ -93,7 +93,7 @@ Camping advances time by eight hours.
 
 The wind drifts on its own, whatever the weather. Interiors and caves don't show the weather, but it carries on outside. See [weather](systems/weather.md).
 
-**(decomp)** Time of day, calendar, moon phase, weather, and terrain are all mirrored into event flags, so dialogue and map objects can react to them.
+**(pseudocode)** Time of day, calendar, moon phase, weather, and terrain are all mirrored into event flags, so dialogue and map objects can react to them.
 
 **(machine code)** Weather affects combat: throwing potions takes accuracy penalties at night, in fog, and in storms, with an extra penalty per unit of distance beyond 5 in bad weather, and ranged attacks lose more the harder it rains. Fog also shortens how far monsters see.
 
@@ -107,7 +107,7 @@ Some encounters appear only at night, and some only during the day. This is rare
 
 Aspect is a cross-cutting property: each character, some weapons, and each spell is either **solar** or **lunar**. Solar things perform better during the day; lunar things perform better at night. A character's aspect is shown in the pause menu under their portrait.
 
-**(decomp)** For attack accuracy, a character whose aspect matches the time of day gets ×1.25, and one whose aspect is opposed gets ×0.75. Only night versus not-night matters. Enemies with an opposed aspect are also slightly more likely to flee.
+**(pseudocode)** For attack accuracy, a character whose aspect matches the time of day gets ×1.25, and one whose aspect is opposed gets ×0.75. Only night versus not-night matters. Enemies with an opposed aspect are also slightly more likely to flee.
 
 ## Actors, stealth, and containers
 
@@ -125,7 +125,7 @@ Hostile creatures are unsophisticated, similar to Morrowind. They follow what is
 
 ### Stealth
 
-**(decomp)** Holding Z while moving sneaks; it isn't a toggle. Without Z, pushing the stick less than 80% of the way walks and pushing it further runs.
+**(pseudocode)** Holding Z while moving sneaks; it isn't a toggle. Without Z, pushing the stick less than 80% of the way walks and pushing it further runs.
 
 A sneaking player who goes unnoticed gets no feedback except that the creature's behaviour doesn't switch to chasing. There are no audio cues or visible indicators. The Stealth skill improves the odds of going unnoticed.
 
@@ -177,17 +177,17 @@ Characters have six attributes, twelve general skills, and six weapon skills, al
 
 Level rises at increasing XP thresholds, in the usual JRPG pattern.
 
-**(decomp)** Level 1 starts at 500 XP, level 2 at 2,500, level 3 at 7,000, level 10 at 192,500, level 20 at 1,435,000, and the last, level 40, at 11,070,000. Every XP award is multiplied by 1.5, so an enemy's reward is worth 75 XP per point of its record's byte.
+**(pseudocode)** Level 1 starts at 500 XP, level 2 at 2,500, level 3 at 7,000, level 10 at 192,500, level 20 at 1,435,000, and the last, level 40, at 11,070,000. Every XP award is multiplied by 1.5, so an enemy's reward is worth 75 XP per point of its record's byte.
 
 Maximum HP is the sum of level, Endurance, and Stamina.
 
-**(decomp)** The sum counts each at most at its cap (40, 90 and 40). Damage takes the level's points first, then Stamina's, then Endurance's; healing restores Endurance first, then Stamina, then the level. Skills and spells spend Stamina, then Endurance, but never the level's points. A level gained also restores its point.
+**(pseudocode)** The sum counts each at most at its cap (40, 90 and 40). Damage takes the level's points first, then Stamina's, then Endurance's; healing restores Endurance first, then Stamina, then the level. Skills and spells spend Stamina, then Endurance, but never the level's points. A level gained also restores its point.
 
 ### Attributes
 
 Attributes are raised by spending XP after a battle.
 
-**(decomp)** Only after a battle: trainers don't offer them. Raising an attribute from *n* costs (n + 1)² × 12 XP, or × 24 for Dexterity and × 4 for Stamina. They stop at 30, Endurance at 40 and Stamina at 90; gear and spells can take them 10 higher, and Stamina 30.
+**(pseudocode)** Only after a battle: trainers don't offer them. Raising an attribute from *n* costs (n + 1)² × 12 XP, or × 24 for Dexterity and × 4 for Stamina. They stop at 30, Endurance at 40 and Stamina at 90; gear and spells can take them 10 higher, and Stamina 30.
 
 | Attribute | Effect |
 | --- | --- |
@@ -198,7 +198,7 @@ Attributes are raised by spending XP after a battle.
 | Endurance | Hit points (believed to be its only use) |
 | Stamina | Hit points, and the depletable resource for skill and spell use |
 
-**(decomp)** The game's own descriptions add a few: Intelligence also helps Loremaster and the other knowledge skills, Dexterity helps hit chance and defence against weapons, and Strength helps melee hit chance.
+**(pseudocode)** The game's own descriptions add a few: Intelligence also helps Loremaster and the other knowledge skills, Dexterity helps hit chance and defence against weapons, and Strength helps melee hit chance.
 
 Because Stamina is both part of max HP and the resource spent on skills, using most skills and spells effectively costs hit points.
 
@@ -207,7 +207,7 @@ Because Stamina is both part of max HP and the resource spent on skills, using m
 | Skill | Effect |
 | --- | --- |
 | Alchemist | Brewing potions; throwing potions in battle |
-| Diplomat | Makes NPCs friendlier. **(decomp)** Conversations check it 45 times, so it opens dialogue. |
+| Diplomat | Makes NPCs friendlier. **(pseudocode)** Conversations check it 45 times, so it opens dialogue. |
 | Healer | Healing effectiveness in and out of battle |
 | Loremaster | Length and number of books readable in libraries |
 | Mechanic | Disarming container traps; crafting armour |
@@ -236,7 +236,7 @@ Weapon skills primarily affect hit chance. A character with zero in a weapon ski
 
 Skills and weapon skills can be raised two ways: by spending XP after a battle, or at a trainer for gold plus a smaller XP cost. A skill at level zero must be taught to at least level 1 by a trainer; it can't be started from nothing after a battle.
 
-**(decomp)** The details:
+**(pseudocode)** The details:
 
 - Raising a skill from level *n* costs (n + 1)² × its cost in XP. The costs are 1,500 for Alchemist and Wizard, 1,000 for Healer, Ranger, Thief, Troubadour and Warrior, 750 for Loremaster and Merchant, 500 for Diplomat, Mechanic and Stealth, 600 for Missile and Sword, 400 for Hafted, Pole and Thrown, and 500 for Shield.
 - A trainer takes 80% of that, plus (n + 1) × 40 gold, or 200 gold from level 0. Oriana takes no gold.
@@ -248,11 +248,11 @@ Skills and weapon skills can be raised two ways: by spending XP after a battle, 
 
 Some characters can never learn some skills. For example, most magic users can't use shields, and warrior characters can't learn Wizard.
 
-**(decomp)** A character who can't learn Wizard can't learn any spell. Learning one also needs Wizard at least the spell's requirement, and the spell of the character's school or unschooled; Alaron's school, Chaos, takes any.
+**(pseudocode)** A character who can't learn Wizard can't learn any spell. Learning one also needs Wizard at least the spell's requirement, and the spell of the character's school or unschooled; Alaron's school, Chaos, takes any.
 
 ### Skill checks in conversation
 
-**(decomp)** Conversations only check Diplomat, Loremaster and Troubadour. The check rolls d100 against a bonus and gives a step from 0 to 21. Diplomat's bonus is the best Intelligence of the living party × 3, plus 10 per level of Diplomat across it, plus 50; Loremaster's is the best Intelligence × 3 plus 6 per level across the party; Troubadour's is the best Troubadour's level plus their Dexterity × 3. The first check in a conversation is remembered, so talking again can't do better, except for Troubadour.
+**(pseudocode)** Conversations only check Diplomat, Loremaster and Troubadour. The check rolls d100 against a bonus and gives a step from 0 to 21. Diplomat's bonus is the best Intelligence of the living party × 3, plus 10 per level of Diplomat across it, plus 50; Loremaster's is the best Intelligence × 3 plus 6 per level across the party; Troubadour's is the best Troubadour's level plus their Dexterity × 3. The first check in a conversation is remembered, so talking again can't do better, except for Troubadour.
 
 ## Magic
 
@@ -274,7 +274,7 @@ Alaron can cast from every school, presumably for plot reasons. Other characters
 
 Spells can only be cast in battle. The pause menu's spell list is informational.
 
-**(decomp)** Photosynthesis can't be cast at night. **(machine code)** It's left out of C-down's list while the battle's part of the day is night, and heals nothing in a round the clock says is night. No spell can be cast outside combat at all: Detecting Traps, Opening and Stealth are for the field, and nothing casts them ([magic](systems/magic.md)).
+**(pseudocode)** Photosynthesis can't be cast at night. **(machine code)** It's left out of C-down's list while the battle's part of the day is night, and heals nothing in a round the clock says is night. No spell can be cast outside combat at all: Detecting Traps, Opening and Stealth are for the field, and nothing casts them ([magic](systems/magic.md)).
 
 ### Learning and levelling
 
@@ -293,17 +293,17 @@ Spell battery regenerates slowly over time outside of battle, similar to enchant
 
 All spell targeting uses a radius centred on or controlled by the caster.
 
-**(decomp)** The radius is the spell's **effective level** multiplied by the spell's base range value. Intelligence plays no part. The effective level is the lower of the caster's Wizard skill and the spell's level; for item spells, it's the item's fixed level.
+**(pseudocode)** The radius is the spell's **effective level** multiplied by the spell's base range value. Intelligence plays no part. The effective level is the lower of the caster's Wizard skill and the spell's level; for item spells, it's the item's fixed level.
 
-**(decomp)** Spells need line of sight. Arena geometry blocks them, and so do other combatants' bodies (see Battle mode).
+**(pseudocode)** Spells need line of sight. Arena geometry blocks them, and so do other combatants' bodies (see Battle mode).
 
 **Single target.** A radius appears around the caster; the player selects one ally, enemy, or themselves within it. Self-cast and enemy-cast use identical targeting. Wind is unusual in being castable on either self or an enemy.
 
-**(decomp)** Cast on an enemy, Wind does damage. Cast on an ally or self, it applies a timed Wind enchantment instead. **(machine code)** When an enchantment of that kind ends, combat's class of bad weather is set to fog, which only combat's penalties read; the weather itself doesn't change. **(machine code)** That enchantment is Wind's own: cast on an ally, it raises Stamina and its maximum by 2 a level, which nothing takes back, and its record ends as any spell's does ([magic](systems/magic.md)).
+**(pseudocode)** Cast on an enemy, Wind does damage. Cast on an ally or self, it applies a timed Wind enchantment instead. **(machine code)** When an enchantment of that kind ends, combat's class of bad weather is set to fog, which only combat's penalties read; the weather itself doesn't change. **(machine code)** That enchantment is Wind's own: cast on an ally, it raises Stamina and its maximum by 2 a level, which nothing takes back, and its record ends as any spell's does ([magic](systems/magic.md)).
 
 **Caster-centred area.** The game picks the targets within the radius; the player can't choose. The targeting is smart: it won't put damage spells on allies, and recasting will cover the members missed the first time.
 
-**(decomp)** Most area spells affect half the effective spell level in targets, rounded up (level 1–2: one target, 3–4: two, and so on). A few spells are flagged to hit every valid target instead.
+**(pseudocode)** Most area spells affect half the effective spell level in targets, rounded up (level 1–2: one target, 3–4: two, and so on). A few spells are flagged to hit every valid target instead.
 
 **Player-placed area.** The player moves the radius to a spot within a reach set by the same stat soup. This is indiscriminate: everyone inside is affected, allies included, and nobody is affected if it's empty. Probably only Fireball and Teleportation use it; Teleportation moves the caster to the chosen spot.
 
@@ -340,9 +340,9 @@ Inventory is unlimited, gold is unlimited, and crafting happens by using skills 
 
 Each character has one weapon slot, which holds a melee weapon, thrown weapon, missile weapon (bow or crossbow), or a thrown potion.
 
-**(decomp)** The full slot list is weapon, head, cloak, amulet, body armour, gloves, belt, boots, shield, wand, and two rings. Wands have their own slot, which rope and banner items also use. There's no legwear slot and no separate bracers slot; gauntlets are glove-slot items.
+**(pseudocode)** The full slot list is weapon, head, cloak, amulet, body armour, gloves, belt, boots, shield, wand, and two rings. Wands have their own slot, which rope and banner items also use. There's no legwear slot and no separate bracers slot; gauntlets are glove-slot items.
 
-**(decomp)** The equipment code also has three scroll slots, and scrolls carry charges the same way wands do. That suggests scrolls can be equipped and cast from, not only used to learn a spell. This hasn't been checked in play.
+**(pseudocode)** The equipment code also has three scroll slots, and scrolls carry charges the same way wands do. That suggests scrolls can be equipped and cast from, not only used to learn a spell. This hasn't been checked in play.
 
 Equipping a weapon or shield requires at least level 1 in the matching weapon skill.
 
@@ -461,7 +461,7 @@ Choosing any of these actions ends the turn:
 - Cast a spell (single target, caster-centred area, or player-placed area; see Magic).
 - Heal an ally with the Healer skill.
 
-**(decomp)** The battle controls and menus are as follows:
+**(pseudocode)** The battle controls and menus are as follows:
 
 - **C-up** opens potions and item spells. The potions are the drinkable ones, meaning healing and later potion types except Stealth. The item spells can come from the weapon, armour, shield, or any worn item that has charges left.
 - **C-down** opens spells and skills: learned spells (only those whose reagent the party has), Troubadour, Healer by hand, and healing with herbs.
@@ -471,7 +471,7 @@ Choosing any of these actions ends the turn:
 - **B**, **Z**, or **L** cancels an action that's been selected but not confirmed.
 - **Start** opens the pause menu. In battle it only offers the System and Party tabs.
 
-**(decomp)** Ranged attacks, thrown potions, and spells all need line of sight. The check fails if arena geometry or another living combatant's body is in the way.
+**(pseudocode)** Ranged attacks, thrown potions, and spells all need line of sight. The check fails if arena geometry or another living combatant's body is in the way.
 
 ### Troubadour
 
@@ -536,7 +536,7 @@ The player loses when every party member is immobilized, or when Alaron's HP rea
 
 The player can flee from the pause menu. It always succeeds with no penalty, but places the party back at what appears to be a checkpoint in trek mode rather than where the battle started.
 
-**(decomp)** Fleeing isn't available in boss battles: Kitarak, Marquis, Pochanargat, Ehud, Sheridan, Behrooz, Nasim, Golnar, Mehrdad, Shatrevar, Ksathra, and Assim. It is available against the Shadow.
+**(pseudocode)** Fleeing isn't available in boss battles: Kitarak, Marquis, Pochanargat, Ehud, Sheridan, Behrooz, Nasim, Golnar, Mehrdad, Shatrevar, Ksathra, and Assim. It is available against the Shadow.
 
 **(machine code)** The checkpoints are breadcrumbs. While the player walks in trek mode, the game records their position every two seconds (120 ticks), skipping any spot within 10 units of an existing breadcrumb, and keeps the last 15. On fleeing, the party is placed at the breadcrumb in the same map set that's **farthest** from where the battle began. Every time trek is rebuilt (after a battle, a cut-scene, a load and so on), all 15 are reset to where the player stands, so breadcrumbs aren't related to saves. After a win, the party stands exactly where the battle began. See [combat](systems/combat.md#in-and-out).
 
@@ -569,7 +569,7 @@ The pause menu is a dense, power-user hub with three top-level tabs, and its cen
 
 ### Pause menu: top level
 
-**(decomp)** Z (or L) moves to the previous tab and R to the next. There are three tabs, left to right:
+**(pseudocode)** Z (or L) moves to the previous tab and R to the next. There are three tabs, left to right:
 
 1. **System.** Save, load, options, credits, unlocked cut-scenes, help, quit.
 2. **Party.** The combined character, inventory, and skills screen (below).
@@ -577,7 +577,7 @@ The pause menu is a dense, power-user hub with three top-level tabs, and its cen
 
 ### Party tab layout
 
-The top left shows the selected party member's portrait, with aspect and spell school (if any) beneath it. C-left and C-right cycle party members. To the right: an HP bar, current and maximum HP, level, and party gold. **(decomp)** XP isn't shown here.
+The top left shows the selected party member's portrait, with aspect and spell school (if any) beneath it. C-left and C-right cycle party members. To the right: an HP bar, current and maximum HP, level, and party gold. **(pseudocode)** XP isn't shown here.
 
 Below that, the left side shows a generic humanoid silhouette with icon squares for each equipped item in its body position. This area is covered whenever a popover opens.
 
@@ -637,13 +637,13 @@ The camera is a floating third-person camera, similar to Super Mario 64. Holding
 | C-up in battle (hold) | Potions and item spells |
 | C-down in battle (hold) | Spells and skills |
 
-**(decomp)** Confirmed in the decomp so far: the walk/run threshold, the Z, L, R, and Start rows, B cancelling in battle, and both battle C-button rows.
+**(pseudocode)** Confirmed in the pseudocode so far: the walk/run threshold, the Z, L, R, and Start rows, B cancelling in battle, and both battle C-button rows.
 
 ### Saving
 
 The game allows saving anywhere, and each save stores a small screenshot, which is unusual on the N64. A reimplementation that reads original saves will need to account for the image data. Saves are unrelated to the checkpoints used when fleeing battle (see Battle mode).
 
-**(decomp)** The screenshot is 64×32 pixels at 16-bit colour. A save also holds the party, player position and map, the event flags, game state, a minimap-reveal block, and per-map object state, followed by a checksum. A save-point object type exists in the map format but is never used.
+**(pseudocode)** The screenshot is 64×32 pixels at 16-bit colour. A save also holds the party, player position and map, the event flags, game state, a minimap-reveal block, and per-map object state, followed by a checksum. A save-point object type exists in the map format but is never used.
 
 ### Camping
 
@@ -658,7 +658,7 @@ Camping is started from the World tab and is allowed anywhere outside towns. It:
 
 These are unresolved from observation and are good targets for ROM inspection or a focused playthrough.
 
-Answered items were resolved from the decomp. Details are in the relevant sections.
+Answered items were resolved from the pseudocode. Details are in the relevant sections.
 
 - [x] Is loading done at chokepoints, or is there some streaming? **Streaming: a 3×3 block of map chunks around the player.**
 - [x] Do all interiors physically exist somewhere in the worldspace? **No. Many live in separate map sets, including three shared interior sets.**
