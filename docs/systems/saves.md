@@ -1,10 +1,10 @@
 # Saves and the game state (roadmap 2.8)
 
-`AidynRenewed.Core.GameState` is the game as it stands, `AidynRenewed.Plugins.Saves` the port's save format, and `AidynRenewed.Rom.Rig.CheckpointSave` turns the user's checkpoints into saves. Ported from `QuestData.cpp`, `saveParty.cpp` and `voxelChart.cpp`.
+`AidynEnhanced.Core.GameState` is the game as it stands, `AidynEnhanced.Plugins.Saves` the port's save format, and `AidynEnhanced.Rom.Rig.CheckpointSave` turns the user's checkpoints into saves. Ported from `QuestData.cpp`, `saveParty.cpp` and `voxelChart.cpp`.
 
 ## The game state
 
-`GameState` holds the flags with the engine's state flags, the clock, the time played, the party with its inventory, what map objects remember, the random streams (ADR 0006) and where the player is. It's the `IScriptWorld` scripts run against, so the editor's script player and the runtime share it. `CharacterSaves` (`AidynRenewed.Core.Characters`) is the mapping between the party and its sheets and `SaveParty` and `SaveCharacter`, saving and loading side by side (`SaveParty::SaveCharSheet`, `LoadCharSheet`, the spellbook's order); `GameState` calls it.
+`GameState` holds the flags with the engine's state flags, the clock, the time played, the party with its inventory, what map objects remember, the random streams (ADR 0006) and where the player is. It's the `IScriptWorld` scripts run against, so the editor's script player and the runtime share it. `CharacterSaves` (`AidynEnhanced.Core.Characters`) is the mapping between the party and its sheets and `SaveParty` and `SaveCharacter`, saving and loading side by side (`SaveParty::SaveCharSheet`, `LoadCharSheet`, the spellbook's order); `GameState` calls it.
 
 - **A new game** (`Game.Init`, `0x8001ee70`): the flags' initial values, noon on day 2 of week 6, and Alaron alone, wearing what his record gives him, with 1 gold. The new game record says so (`aidyn:newgame/0`, [hardcoded content](../hardcoded-content.md)), and where he arrives (`GameSession.Arrival`): the Overworld's I08 at (16, 62), 10 up.
 - **Time passing** (`PassTime`) runs the clock and writes the calendar's flags, as trek does every frame. The time played is counted every tick, in every mode (`GameState.CountTick`, from `GameSession.Tick`).
@@ -14,17 +14,17 @@
 
 The CLI makes saves without the game, with the installed plugins:
 
-- `aidyn-renewed save new [<save>]` writes a new game.
-- `aidyn-renewed save from <checkpoint> [<save>]` turns a checkpoint into a save (below).
-- `aidyn-renewed save show <save>` loads a save with the core and prints what it makes of it (time, place, flags, each member's sheet, gold, inventory, memories), then anything it couldn't use, with exit code 1.
+- `aidyn-enhanced save new [<save>]` writes a new game.
+- `aidyn-enhanced save from <checkpoint> [<save>]` turns a checkpoint into a save (below).
+- `aidyn-enhanced save show <save>` loads a save with the core and prints what it makes of it (time, place, flags, each member's sheet, gold, inventory, memories), then anything it couldn't use, with exit code 1.
 
 They write to the data folder's `saves` unless given a path, where the System tab's save and load screens find them too, newest first. A save can be edited by hand, and `save show` says whether the game can use it.
 
 Three more read and write the original's saves in a Controller Pak (below), for loading the original at a place the user is to check. They take the ROM, for the inventory's slots, and use the pak ares keeps beside it (`<rom basename>.pak`) unless given `--pak`:
 
-- `aidyn-renewed save pak <rom>` lists the pak's saves: slot, name, time played, place and party.
-- `aidyn-renewed save to-pak <rom> <save> [<slot>]` writes a save into a slot, A to P (default A), replacing the one there. It keeps the pak as it was beside it first (`<pak>.<time>.bak`), and makes a blank pak if there's none. A save without a place, a new game's, is written where a new game arrives, on the ground. Loading it skips the opening cinematic, but trek there starts the opening's script, whose dialogue object holds the arrival ([events](events.md#where-the-port-differs)). ares writes its pak back as it closes, so close it first.
-- `aidyn-renewed save from-pak <rom> [<slot>] [--out <save>]` turns a slot's save into one of the port's.
+- `aidyn-enhanced save pak <rom>` lists the pak's saves: slot, name, time played, place and party.
+- `aidyn-enhanced save to-pak <rom> <save> [<slot>]` writes a save into a slot, A to P (default A), replacing the one there. It keeps the pak as it was beside it first (`<pak>.<time>.bak`), and makes a blank pak if there's none. A save without a place, a new game's, is written where a new game arrives, on the ground. Loading it skips the opening cinematic, but trek there starts the opening's script, whose dialogue object holds the arrival ([events](events.md#where-the-port-differs)). ares writes its pak back as it closes, so close it first.
+- `aidyn-enhanced save from-pak <rom> [<slot>] [--out <save>]` turns a slot's save into one of the port's.
 
 ## The format
 
@@ -67,7 +67,7 @@ A save made from the "Before final encounter" checkpoint, cut short:
 }
 ```
 
-- **The place** is the map set, the chunk by name, the centre of the player's sphere in the chunk's coordinates, and the way he faces in X and Z. The original keeps the opposite of that, `facing`. Without a place, the game starts as a new game does (`GameState.StartsAsNewGame`): where a new game arrives, and in the runtime with the opening cinematic and its script, as the title's New Game. Such a save is a new game's, `aidyn-renewed save new`'s or the editor's new game's, since every save made in play notes where the player stands (`GameSession.NotePlace`), as every one of the original's is made in trek. So the load screen's entry for one starts a new game whether it's loaded from the menu or the game began with it. The original's Continue goes straight to trek (`Title.ModeFrame`'s state 2 returns mode 1, `0x800551c0`), and its saves always have a place.
+- **The place** is the map set, the chunk by name, the centre of the player's sphere in the chunk's coordinates, and the way he faces in X and Z. The original keeps the opposite of that, `facing`. Without a place, the game starts as a new game does (`GameState.StartsAsNewGame`): where a new game arrives, and in the runtime with the opening cinematic and its script, as the title's New Game. Such a save is a new game's, `aidyn-enhanced save new`'s or the editor's new game's, since every save made in play notes where the player stands (`GameSession.NotePlace`), as every one of the original's is made in trek. So the load screen's entry for one starts a new game whether it's loaded from the menu or the game began with it. The original's Continue goes straight to trek (`Title.ModeFrame`'s state 2 returns mode 1, `0x800551c0`), and its saves always have a place.
 - **Flags** are the plain flags that are set, but for flag 1, which always is. Derived flags are evaluated on loading.
 - **The journal's order:** its entries in the order they were added (`journal`). The original doesn't keep it, as it lists them in its table's order; the user chose to list them as they came. On loading, an entry that's on and not listed, as in a save made from a checkpoint, comes before those listed, in the table's order.
 - **A member** is what the original saves of a character sheet (`SaveParty::SaveCharSheet`): experience, the trained and current stats, base skill levels, what's worn with each item's battery and charges, the spellbook, and the potions working on them, each with its power and what's left of its timer (`SavePotionEffect`). A skill that can't be learnt is left out. Loading applies the potions again after what's worn (`LoadCharSheetEffects`); the checkpoints' converter doesn't read them yet. The port also saves whether the member knows their True Name (`trueName`, from the sheet's bit in a checkpoint), as a plugin's trigger can give anyone theirs ([events](events.md)); the original's comes back from the record and Alaron's flag, 590, as it still does for a save without it. **Deviation:** the original saves none, since it saves its copies of the party's sheets (`SaveEntity::BenchParty`) and the copy (`SaveEntity::Copy`) leaves out the effects, so a potion's effect is gone after loading. The user chose to keep them.
@@ -95,7 +95,7 @@ A save made from the "Before final encounter" checkpoint, cut short:
 
 ## Map objects' memory
 
-`MapObjectMemory` (`AidynRenewed.Core.MapObjects`) is the original's `VoxelChart`: what map objects remember for a while.
+`MapObjectMemory` (`AidynEnhanced.Core.MapObjects`) is the original's `VoxelChart`: what map objects remember for a while.
 
 | Kind | Original's type | What | Lasts |
 | --- | --- | --- | --- |
@@ -133,7 +133,7 @@ Loading a converted save gives what the console holds for every member's stats, 
 
 ## The original's save
 
-`PakSave` (`AidynRenewed.Rom.Rig`) is the original's save field by field, and round-trips the user's four saves byte for byte; `PakSaves` turns one into the port's save and back, and reads and writes them in a pak (`ControllerPak`, libultra's file system). 1.1's save code is 1.0's, instruction for instruction but for data addresses, so its saves are the same.
+`PakSave` (`AidynEnhanced.Rom.Rig`) is the original's save field by field, and round-trips the user's four saves byte for byte; `PakSaves` turns one into the port's save and back, and reads and writes them in a pak (`ControllerPak`, libultra's file system). 1.1's save code is 1.0's, instruction for instruction but for data addresses, so its saves are the same.
 
 **The note.** A save is a note of 0x1C00 bytes, 28 pages: game code `NAYE`, company `78`, name `CHRONICLES` and extension the slot's letter, A to P, in the pak's character codes (`Pak.CharCodes`, `0x800E4220`). The save menu writes it in one `osPfsReadWriteFile` (`SaveMenu.WriteNote`, `0x8007EE34`), and a new one takes the first letter free (`SaveMenu.CreateNote`, `0x8007EB2C`). The load menu (`SaveMenu.ScanSlot`, `0x8007D9A4`) lists every note of that game code and company, whatever its name, and calls one whose CRC fails corrupt, offering to delete it. Nothing else is checked, so a save naming an entity or item that doesn't exist would break loading.
 

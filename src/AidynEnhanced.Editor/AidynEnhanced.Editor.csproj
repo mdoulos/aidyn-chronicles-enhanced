@@ -1,0 +1,23 @@
+<Project Sdk="Godot.NET.Sdk/4.7.2">
+
+  <PropertyGroup>
+    <!-- Explicit, or the Godot editor writes its own default (net8.0) into this file. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AidynEnhanced.Editor</RootNamespace>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The editor reads plugins (ADR 0010). AidynEnhanced.Rom is only for running the importer and reading checkpoints, which needs no ROM. -->
+    <ProjectReference Include="..\AidynEnhanced.Core\AidynEnhanced.Core.csproj" />
+    <ProjectReference Include="..\AidynEnhanced.Plugins\AidynEnhanced.Plugins.csproj" />
+    <ProjectReference Include="..\AidynEnhanced.Rom\AidynEnhanced.Rom.csproj" />
+    <!-- The runtime's views, so the editor plays actors and draws map sets as the game does (ADRs 0010, 0022). -->
+    <ProjectReference Include="..\AidynEnhanced.Views\AidynEnhanced.Views.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="AidynEnhanced.Views" />
+  </ItemGroup>
+
+</Project>

@@ -80,7 +80,7 @@ Each track ends with an exporter to an open format and a viewer in the editor: i
 | **1B Animation** | Borg6 tracks, Borg7 actors, Borg5 particles | L | The opening cinematic plays in the editor | Done Sep 27, 2026 |
 | **1C Maps** | Chunk tables per map set, Borg9 collision and map objects, Expansion Pak variants | L | A map viewer shows a whole map set with its objects | Done Sep 27, 2026 |
 | **1D Audio** | Borg11 PCM, Borg12 sequences and their playback, the audiokey table | M | BGM plays correctly | Done Oct 10, 2026; what isn't played yet is in [audio](systems/audio.md) |
-| **1E Quest atlas** | Borg13 decoding with its branching, the flag network, flag cross-references, journal linkage | L | What sets and reads every flag, and which journal entry it maps to (`aidyn-renewed flag <n>`, and the editor's Atlas tab) | Done |
+| **1E Quest atlas** | Borg13 decoding with its branching, the flag network, flag cross-references, journal linkage | L | What sets and reads every flag, and which journal entry it maps to (`aidyn-enhanced flag <n>`, and the editor's Atlas tab) | Done |
 | **1F Text & UI assets** | String tables, the fonts, portraits, menu images | S | The dialogue box renders in the right font | Done |
 | **1G Saves** (optional) | Importing the original's Controller Pak saves | M | An original save imports | Open. The checkpoints already convert into saves (2.8). |
 | **1H Hardcoded content** | Every piece of content in code rather than data, each assigned an [ADR 0008](adr/0008-content-logic-layers.md) layer | M | [hardcoded-content](hardcoded-content.md) | Done Oct 19, 2026: every content table is read or carried |
@@ -129,7 +129,7 @@ The base game is a plugin, so the mod format is exercised all the time; Phase 5 
 
 | Task | Size | Status |
 | --- | --- | --- |
-| Plugin loader: load order, dependencies, field-level merge, conflict report | M | Done: `PluginSet`, `aidyn-renewed conflicts`, `aidyn-renewed schema` |
+| Plugin loader: load order, dependencies, field-level merge, conflict report | M | Done: `PluginSet`, `aidyn-enhanced conflicts`, `aidyn-enhanced schema` |
 | Flag and ID allocation for mod namespaces | S | |
 | Asset overrides (glTF, PNG, OGG) and new assets | M | |
 | Scripting: a Borg13 superset for dialogue and cut-scenes, plus sandboxed Lua event handlers on the 2.10 events (ADR 0008). Mods can't load .NET assemblies. | L | |

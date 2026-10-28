@@ -1,0 +1,25 @@
+; Engine configuration file.
+
+config_version=5
+
+[application]
+
+config/name="Aidyn Chronicles Enhanced Editor"
+run/main_scene="res://Main.tscn"
+config/version="0"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+config/icon="res://icon.png"
+
+[dotnet]
+
+project/assembly_name="AidynEnhanced.Editor"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true
+limits/global_shader_variables/buffer_size=1048576

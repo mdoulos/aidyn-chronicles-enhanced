@@ -1,10 +1,10 @@
-#:project ../../src/AidynRenewed.Core/AidynRenewed.Core.csproj
+#:project ../../src/AidynEnhanced.Core/AidynEnhanced.Core.csproj
 #:property PublishAot=false
 using System.Globalization;
-using AidynRenewed.Core;
-using AidynRenewed.Plugins;
-using AidynRenewed.Plugins.Records;
-using AidynRenewed.Plugins.Saves;
+using AidynEnhanced.Core;
+using AidynEnhanced.Plugins;
+using AidynEnhanced.Plugins.Records;
+using AidynEnhanced.Plugins.Saves;
 
 // Changes a save's party by the scripts' own ops, so the party's flags follow:
 //   dotnet run tools/saves/party.cs -- <in.json> <out.json> [--remove <entity hex,...>] [--add <entity hex,...>]

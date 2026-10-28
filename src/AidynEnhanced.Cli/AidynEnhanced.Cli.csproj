@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>aidyn-enhanced</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AidynEnhanced.Core\AidynEnhanced.Core.csproj" />
+    <ProjectReference Include="..\AidynEnhanced.Rom\AidynEnhanced.Rom.csproj" />
+  </ItemGroup>
+
+</Project>

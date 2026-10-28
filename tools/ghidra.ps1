@@ -22,7 +22,7 @@ $home_ = if ($env:GHIDRA_HOME) { $env:GHIDRA_HOME } else {
 }
 if (-not $home_) { throw 'Ghidra not found: unpack a release into tools/ghidra_<version>_PUBLIC or set GHIDRA_HOME' }
 $headless = Join-Path $home_ 'support\analyzeHeadless.bat'
-$romsDir = if ($env:AIDYN_RENEWED_ROMS) { $env:AIDYN_RENEWED_ROMS } else { Join-Path $repo 'roms' }
+$romsDir = if ($env:AIDYN_ENHANCED_ROMS) { $env:AIDYN_ENHANCED_ROMS } else { Join-Path $repo 'roms' }
 $out = Join-Path $repo 'out\ghidra'
 $scripts = Join-Path $PSScriptRoot 'ghidra'
 New-Item -ItemType Directory -Force $out | Out-Null

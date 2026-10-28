@@ -1,6 +1,6 @@
 # Scripts: the Borg13 VM (roadmap 2.4)
 
-`AidynRenewed.Core.Scripts`. The format and what the importer writes are in [dialogue](../formats/dialogue.md).
+`AidynEnhanced.Core.Scripts`. The format and what the importer writes are in [dialogue](../formats/dialogue.md).
 
 `ScriptRunner` runs one script (`aidyn:dialogue/0x…`) against the flag network and the game state. It ports the walk over the nodes (`DialogNode.cpp`) and the callbacks that carry out the ops (`dialogue.cpp`, `dialogmode.cpp`), from the debug build's machine code. `GameState.RunScript` makes a runner against the game: its flags, its world stream of random numbers and the flag that rolls skill checks 0–21. Conversations, cut-scenes and the editor's script page all start theirs there; the editor passes a world of its own that fixes skill checks by hand.
 
@@ -38,7 +38,7 @@ A page is the line and the choices under it, as the original's `diags` list hold
   - **The port fixes it** ([ADR 0018](../adr/0018-the-port-fixes-bugs-and-sets-enhancements.md)), in conversations only, the user's choice: an animated line plays its request in place of the talk as it shows, and shows once. `ScriptRunner.Show` cues `AnimateCue(speaker, request)` as such a line shows, for the speaker the box shows, so a node with none of its own (`0x037B`'s 26, "Get out of my sight, worm!") takes the one before it (the Marquis, from node 25); the effect then does nothing, and nothing waits.
   - In trek, `Conversation` asks the speaker's body for the request in place of the talk for that press, by the talk's own rule ([wanderers](wanderers.md#talking)), if the speaker's actor has a branch for it in any state; if not, the speaker talks, as for any line, as the keeper does. Like the talk, the request lasts until the bodies next step, then both are asked to stand. Alaron reaches out as he takes the key (his actor's state 33).
   - Cut-scenes are as 1.0 has them.
-- **`Battle`** hands over the enemies from `AddEnemy` (a thirteenth faults), the arena (above 27 becomes 0), the collision and animation bytes, whether the party can flee (not in cut-scenes), and the record's `battleFlag`, as the ending's `BattleSetup` (`AidynRenewed.Core.Combat`). In a conversation with someone who wanders, the original fights their party instead, under its flag C, in the arena their chunk's terrain chooses, with the bytes 0 and fleeing allowed (`BattleSetup.Against`, [combat](combat.md#in-and-out)), and a shop or training uses them as the keeper.
+- **`Battle`** hands over the enemies from `AddEnemy` (a thirteenth faults), the arena (above 27 becomes 0), the collision and animation bytes, whether the party can flee (not in cut-scenes), and the record's `battleFlag`, as the ending's `BattleSetup` (`AidynEnhanced.Core.Combat`). In a conversation with someone who wanders, the original fights their party instead, under its flag C, in the arena their chunk's terrain chooses, with the bytes 0 and fleeing allowed (`BattleSetup.Against`, [combat](combat.md#in-and-out)), and a shop or training uses them as the keeper.
 - **Where an ending leads** is decided in the core (`Transition.AfterScript`): the hours a camp heal or a camp scene passes, then the keeper's shop, their training, or the battle where the script ran. A keeper with no shop, or no keeper for training, is said instead, where the original would crash or open empty lists. Trek carries out a conversation's ending, the session a cut-scene's.
 - **`CampHeal`** heals the party and ends the script, and eight hours pass. A camp scene (`rest`) adds eight more, so a camp heal in one would pass sixteen.
 - **`AddMember` and `RemoveMember`** add and take away members, with their flags and kept sheets ([characters](characters.md#joining-and-leaving)). Retail ignores whether AddMember worked: the scripts check the party's size first. AddMember working in a conversation tells the runtime that the one talking leaves the map rather than going back to wandering ([wanderers](wanderers.md#joining)).
@@ -54,7 +54,7 @@ Two scripts have problems in the data:
 
 ## Cut-scenes
 
-`CutScene`, `CutSceneActor` and `CutSceneStage` in `AidynRenewed.Core.Scripts`, with `ScriptCameras` in `AidynRenewed.Core.Cameras` and `ScreenFade` at the core's root. From 1.0's machine code.
+`CutScene`, `CutSceneActor` and `CutSceneStage` in `AidynEnhanced.Core.Scripts`, with `ScriptCameras` in `AidynEnhanced.Core.Cameras` and `ScreenFade` at the core's root. From 1.0's machine code.
 
 ### The world it plays in
 

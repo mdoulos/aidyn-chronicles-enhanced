@@ -42,8 +42,8 @@ Resolve addresses against the project's symbol map, `tools/symbols/` (roadmap 0.
 ADR 0002 has the Godot version pinned in the repository. `tools/godot.ps1` runs the pinned editor. On first use it downloads `Godot_v4.7.2-stable_mono_win64.zip` from the official GitHub release, checks it against the release's SHA-512 and unpacks it into the gitignored `.tools/godot/`. The editor runs self-contained (the `._sc_` file beside it), so its settings and caches stay in `.tools/` and don't touch another Godot install. The script runs the console build, so Godot's output and exit code reach the terminal.
 
 ```powershell
-tools/godot.ps1 --path src/AidynRenewed.Editor --editor   # the editor
-tools/godot.ps1 --path src/AidynRenewed.Editor            # run the project
+tools/godot.ps1 --path src/AidynEnhanced.Editor --editor   # the editor
+tools/godot.ps1 --path src/AidynEnhanced.Editor            # run the project
 tools/godot.ps1 -ExePath                              # print the executable's path
 ```
 
@@ -69,7 +69,7 @@ tools/ghidra.ps1 run us Decompile.java 0x80078d14   # a script from tools/ghidra
 
 ## Existing saves
 
-Mupen64Plus saves are in `%APPDATA%\Mupen64Plus\save`. Only `AIDYN_CHRONICLES (unknown rom).mpk` holds Aidyn data. Its four slots, all named "Alaron", are at the four story checkpoints' positions (below), and load on the debug ROM too. The playthrough used a hacked ROM with low-level enemies, so the party's stats, equipment and spells are below par for the story: good for flag, map and quest state, not for combat parity. `<1.0 rom basename> - story saves.pak` keeps the four as they were, for the tests, since the pak ares uses for 1.0 has saves written into it for checks. The pak's layout is in [saves](systems/saves.md#the-originals-save), and `aidyn-renewed save to-pak` writes a save of the port's into the pak beside a ROM, so the original can be loaded at any place, with any flags and party: that's how a check in [user-checks](user-checks.md#setting-up-a-check) is set up without playing to it, with the save-editing scripts in `tools/saves/`.
+Mupen64Plus saves are in `%APPDATA%\Mupen64Plus\save`. Only `AIDYN_CHRONICLES (unknown rom).mpk` holds Aidyn data. Its four slots, all named "Alaron", are at the four story checkpoints' positions (below), and load on the debug ROM too. The playthrough used a hacked ROM with low-level enemies, so the party's stats, equipment and spells are below par for the story: good for flag, map and quest state, not for combat parity. `<1.0 rom basename> - story saves.pak` keeps the four as they were, for the tests, since the pak ares uses for 1.0 has saves written into it for checks. The pak's layout is in [saves](systems/saves.md#the-originals-save), and `aidyn-enhanced save to-pak` writes a save of the port's into the pak beside a ROM, so the original can be loaded at any place, with any flags and party: that's how a check in [user-checks](user-checks.md#setting-up-a-check) is set up without playing to it, with the save-editing scripts in `tools/saves/`.
 
 A Mupen `.mpk` is four 32 KB paks back to back. ares keeps one 32 KB Controller Pak beside the ROM as `<rom basename>.pak`, in the same raw layout, so converting means taking the first 32 KB:
 
@@ -204,7 +204,7 @@ This is the preferred way to inspect checkpoints: it's deterministic, repeatable
 | `GameClock.PlayTime`, the time played | `+0x34` | `+0x34` |
 | `GameClock.Time`, the in-game clock (<c>InGameTime</c>) | `+0x20` | `+0x20` |
 
-The C# side reads states with `AresCheckpoint` (`AidynRenewed.Rom.Rig`), which needs no ROM: it finds RDRAM by the flag table's header, which is in RAM exactly once, and whose pointers give its own address. The tests use it to check the [flag engine](systems/flags.md) against every checkpoint, and the editor loads a checkpoint's flags with it.
+The C# side reads states with `AresCheckpoint` (`AidynEnhanced.Rom.Rig`), which needs no ROM: it finds RDRAM by the flag table's header, which is in RAM exactly once, and whose pointers give its own address. The tests use it to check the [flag engine](systems/flags.md) against every checkpoint, and the editor loads a checkpoint's flags with it.
 
 ### gdb on a checkpoint: `tools/gdb.ps1` (roadmap 0.11)
 
@@ -237,7 +237,7 @@ python tools/gdb/trace.py --report out/trace-<time>.log                         
 
 ### Replaying the original's AI: `tools/aivectors/`
 
-`tools/aivectors/aivectors.py` writes `tests/AidynRenewed.Rom.Tests/CasterVectors.cs`, the table `CasterCheckpointTests` checks the port's casters and bosses against. It runs 1.0's own `ChooseSpellOrAttack`, `RunStyle` and `EnemyAI.Step` in a MIPS interpreter (`cpu.py`) over the RAM of the Combat 02 and 08–11 checkpoints, with each enemy caster built by the original's entity builder in a rat's place (`ovl.py`, `vec.py`, `vec2.py`). The cases are in `cases.py`, the one-off vectors (`ScoreSpellCells` by action slot, `SpellValue` by kind, `AICanCast`, the area danger, the morale spells) in `extras.py`, and `emit.py` writes the C# and a `vectors.json` with every case's full state.
+`tools/aivectors/aivectors.py` writes `tests/AidynEnhanced.Rom.Tests/CasterVectors.cs`, the table `CasterCheckpointTests` checks the port's casters and bosses against. It runs 1.0's own `ChooseSpellOrAttack`, `RunStyle` and `EnemyAI.Step` in a MIPS interpreter (`cpu.py`) over the RAM of the Combat 02 and 08–11 checkpoints, with each enemy caster built by the original's entity builder in a rat's place (`ovl.py`, `vec.py`, `vec2.py`). The cases are in `cases.py`, the one-off vectors (`ScoreSpellCells` by action slot, `SpellValue` by kind, `AICanCast`, the area danger, the morale spells) in `extras.py`, and `emit.py` writes the C# and a `vectors.json` with every case's full state.
 
 ```bash
 pip install capstone numpy
@@ -245,7 +245,7 @@ python tools/aivectors/aivectors.py                  # every case, some minutes
 python tools/aivectors/aivectors.py --only Lugash    # a few cases, to out/aivectors/vectors.json only
 ```
 
-- **Inputs:** the 1.0 ROM in `roms/` (or `AIDYN_RENEWED_ROMS`, or `--roms`), whose code is disassembled with capstone and cached in the gitignored `out/aivectors/insns.pkl`, and the checkpoints' RDRAM through `bst.py`'s `load_rdram`.
+- **Inputs:** the 1.0 ROM in `roms/` (or `AIDYN_ENHANCED_ROMS`, or `--roms`), whose code is disassembled with capstone and cached in the gitignored `out/aivectors/insns.pkl`, and the checkpoints' RDRAM through `bst.py`'s `load_rdram`.
 - **The output is checked in,** the inputs aren't. It is deterministic: running it again gives the same file. Run it only when the cases change or a port-side finding needs a new vector, and commit the new table with the change.
 - **The interpreter** covers the integer and single/double float instructions these functions use, runs a function with `cpu.run(address, args)` and can replace one with a Python stub (`cpu.hooks`, in `sim.py`) for drawing, message queues and sounds. A case that hits an instruction it lacks stops with `unimpl`.
 

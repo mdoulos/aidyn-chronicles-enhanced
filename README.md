@@ -1,4 +1,4 @@
-# Aidyn Renewed
+# Aidyn Chronicles Enhanced
 
 A PC port of the engine that runs Aidyn Chronicles: The First Mage for the
 Nintendo 64, written in C# and Godot. It is a fork of
@@ -19,14 +19,14 @@ trademark.
 ## Getting started
 
 1. Download the latest release
-2. Run `aidyn-renewed` or `aidyn-renewed.exe`
+2. Run `aidyn-enhanced` or `aidyn-enhanced.exe`
 3. On first run, select your ROM, and decide whether or not you want to fix the
    mushroom (you know the one)
 4. Play
 
 To build from source, install the .NET 10 SDK that `global.json` pins and run
-`dotnet test` from the repository root. `aidyn-renewed import <rom>` imports the
-ROM, and `tools/godot.ps1 --path src/AidynRenewed.Game` runs the game on it.
+`dotnet test` from the repository root. `aidyn-enhanced import <rom>` imports the
+ROM, and `tools/godot.ps1 --path src/AidynEnhanced.Game` runs the game on it.
 [CLAUDE.md](CLAUDE.md) maps the code, the formats, the systems and the docs.
 
 ## Accuracy
@@ -91,7 +91,7 @@ there is an inspector and a map/dialogue viewer.
 
 ## Provenance
 
-Aidyn Renewed was forked on October 27, 2026 from
+Aidyn Chronicles Enhanced was forked on October 27, 2026 from
 [HBHT](https://github.com/Aquatakat/hbht) (Hoo Boy, Here's Trouble) by
 Aquatakat, at its commit 6ec85b3, under the MIT license. HBHT's code was
 written mostly by Claude models under its author's direction and playtesting,
@@ -99,7 +99,9 @@ and that is true of the code here. The fork keeps HBHT's git history, its
 architecture decision records in their own words, and the upstream copyright
 notice in [LICENSE](LICENSE) as the record of where the work came from. Its
 name, packages, docs and the names its code cites are its own
-([ADR 0030](docs/adr/0030-the-project-is-aidyn-renewed.md)).
+([ADR 0030](docs/adr/0030-the-project-is-aidyn-renewed.md)). It was called
+Aidyn Renewed until October 28, 2026
+([ADR 0033](docs/adr/0033-the-project-is-aidyn-chronicles-enhanced.md)).
 
 ### Credits
 

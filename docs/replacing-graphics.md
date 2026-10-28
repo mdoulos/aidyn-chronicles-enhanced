@@ -1,10 +1,10 @@
 # Replacing the game's graphics
 
-This guide is for anyone who wants to change how Aidyn Renewed looks: repaint the menus, swap a model, or eventually ship a high-resolution texture pack. It explains how graphics mods work, what you can replace today, and what isn't possible yet.
+This guide is for anyone who wants to change how Aidyn Chronicles Enhanced looks: repaint the menus, swap a model, or eventually ship a high-resolution texture pack. It explains how graphics mods work, what you can replace today, and what isn't possible yet.
 
 ## How it works
 
-Aidyn Renewed never reads your ROM while you play. When you first run it, the importer turns the ROM into a folder of ordinary files called the **base plugin**: PNG images, 3D models in glTF format, sounds and data. The game draws everything from those files.
+Aidyn Chronicles Enhanced never reads your ROM while you play. When you first run it, the importer turns the ROM into a folder of ordinary files called the **base plugin**: PNG images, 3D models in glTF format, sounds and data. The game draws everything from those files.
 
 To change a graphic, you don't edit the base plugin. You make a **mod**: a second folder, next to the base plugin, holding only the files you want to replace. When the game looks for a file, it checks the mods first and falls back to the base plugin for everything they don't provide.
 
@@ -35,10 +35,10 @@ Every graphic has an ID made of a type and a number, such as `aidyn:image/0x0017
 - `texture`: textures, including the engine's sprites.
 - `scene`: models.
 
-To find the one you want, open the editor and browse its list of textures, UI images and scenes. Each entry shows its ID, images open in a gallery, and models open in a viewer that draws them as the game does. The editor is `aidyn-renewed-editor` beside the game in a release. From the source code, run:
+To find the one you want, open the editor and browse its list of textures, UI images and scenes. Each entry shows its ID, images open in a gallery, and models open in a viewer that draws them as the game does. The editor is `aidyn-enhanced-editor` beside the game in a release. From the source code, run:
 
 ```powershell
-tools\godot.ps1 --path src\AidynRenewed.Editor
+tools\godot.ps1 --path src\AidynEnhanced.Editor
 ```
 
 The original files are also in the base plugin's folder, named by number, which is where you'll copy them from:
@@ -55,12 +55,12 @@ The plugins folder is in the game's data folder:
 
 | Install | Plugins folder |
 | --- | --- |
-| Windows installer, or running from source | `%LOCALAPPDATA%\AidynRenewed\plugins` |
+| Windows installer, or running from source | `%LOCALAPPDATA%\AidynEnhanced\plugins` |
 | Windows portable zip | `data\plugins`, beside the game |
-| Linux | `~/.local/share/AidynRenewed/plugins` |
-| macOS | `~/Library/Application Support/AidynRenewed/plugins` |
+| Linux | `~/.local/share/AidynEnhanced/plugins` |
+| macOS | `~/Library/Application Support/AidynEnhanced/plugins` |
 
-If the `AIDYN_RENEWED_DATA` environment variable is set, the data folder is wherever it points.
+If the `AIDYN_ENHANCED_DATA` environment variable is set, the data folder is wherever it points.
 
 Make a folder there for your mod, and put a file named `plugin.json` in it:
 
@@ -162,7 +162,7 @@ To find the models that use a texture, run this Python script with the texture's
 import glob, json, os, struct, sys
 
 texture = int(sys.argv[1], 16)
-folder = os.path.expandvars(r"%LOCALAPPDATA%\AidynRenewed\plugins\aidyn.base\assets\aidyn\scene")
+folder = os.path.expandvars(r"%LOCALAPPDATA%\AidynEnhanced\plugins\aidyn.base\assets\aidyn\scene")
 for path in sorted(glob.glob(os.path.join(folder, "*.glb"))):
     with open(path, "rb") as f:
         data = f.read()

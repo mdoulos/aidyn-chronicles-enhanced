@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AidynEnhanced.Cli/AidynEnhanced.Cli.csproj" />
+    <Project Path="src/AidynEnhanced.Core/AidynEnhanced.Core.csproj" />
+    <Project Path="src/AidynEnhanced.Game/AidynEnhanced.Game.csproj">
+      <BuildType Project="Debug" />
+    </Project>
+    <Project Path="src/AidynEnhanced.Editor/AidynEnhanced.Editor.csproj" />
+    <Project Path="src/AidynEnhanced.Plugins/AidynEnhanced.Plugins.csproj" />
+    <Project Path="src/AidynEnhanced.Rom/AidynEnhanced.Rom.csproj" />
+    <Project Path="src/AidynEnhanced.Views/AidynEnhanced.Views.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AidynEnhanced.Core.Tests/AidynEnhanced.Core.Tests.csproj" />
+    <Project Path="tests/AidynEnhanced.Plugins.Tests/AidynEnhanced.Plugins.Tests.csproj" />
+    <Project Path="tests/AidynEnhanced.Rom.Tests/AidynEnhanced.Rom.Tests.csproj" />
+    <Project Path="tests/AidynEnhanced.TestSupport/AidynEnhanced.TestSupport.csproj" />
+  </Folder>
+</Solution>

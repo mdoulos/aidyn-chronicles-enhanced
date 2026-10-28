@@ -1,6 +1,6 @@
 # Animation: Borg6 (roadmap 1B)
 
-`Borg6Animation` (`AidynRenewed.Rom.Graphics`) reads a Borg6, and `Borg6Player` plays it.
+`Borg6Animation` (`AidynEnhanced.Rom.Graphics`) reads a Borg6, and `Borg6Player` plays it.
 
 - **Borg6 (1,988 animations)** animate the transforms of Borg5 scenes. The file is a 0x10-byte header (the scene, the target count and offset, and the length in ticks), then 0x18-byte targets, 0x10-byte tracks, 8-byte keys and their floats, at offsets from the start of the data. Files are padded to 8 bytes.
 - **A target is one transform,** with a 9-bit mask of the channels it drives: rotation XYZ, then position XYZ, then scale XYZ, one track per set bit. Most drive a model node. A few drive the camera or turn a light, all in cinematics. No animation drives a transform twice.

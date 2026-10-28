@@ -1,6 +1,6 @@
 # Geometry: Borg2 (roadmap 1A)
 
-`Borg2Geometry` (`AidynRenewed.Rom.Graphics`) reads a Borg2, and `F3dex2` runs its display lists.
+`Borg2Geometry` (`AidynEnhanced.Rom.Graphics`) reads a Borg2, and `F3dex2` runs its display lists.
 
 - **Borg2 (5,636 models)** has a 0x50-byte header, followed by these parts in order:
   1. 8 bounding-box vertices per display list.

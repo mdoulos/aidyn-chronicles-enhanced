@@ -1,9 +1,9 @@
-#:project ../../src/AidynRenewed.Core/AidynRenewed.Core.csproj
+#:project ../../src/AidynEnhanced.Core/AidynEnhanced.Core.csproj
 #:property PublishAot=false
 using System.Globalization;
-using AidynRenewed.Core;
-using AidynRenewed.Plugins;
-using AidynRenewed.Plugins.Saves;
+using AidynEnhanced.Core;
+using AidynEnhanced.Plugins;
+using AidynEnhanced.Plugins.Saves;
 
 // Prints flags as a save loads them: dotnet run tools/saves/flags.cs -- <save.json> <n,...>
 var game = GameState.Load(PluginSet.LoadInstalled(DataPaths.Plugins), SaveFile.Read(args[0]));
