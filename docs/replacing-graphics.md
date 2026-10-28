@@ -120,6 +120,23 @@ Collision is stored separately from the visible model. Reshaping a piece of scen
 
 A round trip through Blender hasn't been tested yet. After replacing a model, open it in the editor's model viewer, which draws with the game's own renderer, and check it in the game.
 
+### A skinned character
+
+A character can also be replaced by a modern one: a single mesh that bends around a skeleton, in place of the original's rigid parts. The game needs no change for this. It loads the file through Godot's glTF importer, which skins the mesh, and it plays the animations by their names as it does any model's. A remodelled Alaron of 1,000 triangles and 17 bones has been tested this way: he walks and runs in trek and holds his sword and shield in battle.
+
+The file must keep these from the original:
+
+- **The root part, `transform 2`, at the top, with the original's channels in every animation.** The game moves the character by this part's animation and draws it with its position held, so copy its translation, rotation and scale channels unchanged and put the skeleton under it.
+- **The animations, named `borg6` and a number, with the original's extras** (`borg6` and `length`), sampled 60 times a second as the original's are. Each must move the skeleton's bones as well as the root.
+- **The locators** `locator 0` and up, each with its `locator N attachment` child, hung from the bones that stand for the original's parts: a held weapon, a shield, the head and spell effects are placed on them. Turn each attachment so it ends up facing as the original's does, or the weapon is held at the wrong angle.
+- **The model's extras and its light**, copied from the original.
+
+A character whose head is part of the new mesh still has its original head hung from locator 3, because the head is a separate model. Replace the head's model too, with one that keeps only its root node and has no geometry.
+
+Animate the bones by rotation and, for the hips and the root, translation. A bone animated by scale hasn't been tried, and the game handles a part that's both turned and scaled specially.
+
+The game draws the material's base colour texture with its N64 lighting, which is worked out at each vertex. A normal map and a metal-roughness map are ignored, so detail that only they carry doesn't show.
+
 ## Textures on models
 
 The textures in the `texture` folder are only used for sprites the game draws itself: particles, shadows and the damage numbers. The textures painted on models aren't read from there. Each model file carries its own copy of every texture it uses, so putting a new `texture\0x0EAB.png` in a mod changes nothing on the models that use that texture.
