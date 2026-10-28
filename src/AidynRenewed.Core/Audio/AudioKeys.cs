@@ -75,11 +75,12 @@ public sealed class AudioKeys(GameAudio audio, SoundsRecord sounds, IRandom rand
     /// <param name="frame">Its animation's frame after the step, from 1 (<see cref="Actors.ActorStateMachine.Clock"/>).</param>
     /// <param name="length">Its animation's length in frames.</param>
     /// <param name="surface">The surface its sphere touches, 0 if none.</param>
+    /// <remarks>The port's full run (<see cref="Body.FullRun"/>) sounds as the run, whose keys the original's sounds have.</remarks>
     public void Process(BodyAudio body, BodySounds? profile, int request, int frame, int length, Vector3 position, int surface,
         Vector3 eye, Vector3 aim)
     {
         if (frame == 1)
-            body.Request = request;
+            body.Request = request == Body.FullRun ? Body.Run : request;
         if (surface >= 3)
             body.Surface = surface;
         if (Vector3.Distance(position, aim) > Reach)

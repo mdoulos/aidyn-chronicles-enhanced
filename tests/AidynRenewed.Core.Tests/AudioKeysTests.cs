@@ -114,6 +114,18 @@ public class AudioKeysTests
     }
 
     [Fact]
+    public void AFullRunStepsAsTheRun()
+    {
+        var (keys, audio) = Make();
+        var body = new BodyAudio();
+        var run = new BodySounds(1, [new SoundKey(65500, Movement.Body.Run, [Step])]);
+        keys.Process(body, run, Movement.Body.FullRun, 1, 20, Vector3.Zero, Grass, new Vector3(0, 0, 5), Vector3.Zero);
+        Assert.Equal(Movement.Body.Run, body.Request);
+        keys.Process(body, run, Movement.Body.FullRun, 20, 20, Vector3.Zero, Grass, new Vector3(0, 0, 5), Vector3.Zero);
+        Assert.True(Heard(audio));
+    }
+
+    [Fact]
     public void LoudnessFallsToNothingAt15AndWrapsBeyond()
     {
         Assert.Equal(255, AudioKeys.VolumeAndPan(Vector3.Zero, new Vector3(0, 0, 5), Vector3.Zero).Volume);
