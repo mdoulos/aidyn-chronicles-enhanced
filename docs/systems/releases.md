@@ -84,7 +84,7 @@ Run **Release** by hand from the repository's Actions tab (`workflow_dispatch`).
 
 Only the last job can write to the repository (`contents: write`); the rest read. The actions are GitHub's own, pinned to major versions.
 
-To try the notes without a release: `tools/release-notes.ps1 -Version 2 -Previous HEAD~5 -RepositoryUrl https://github.com/mdoulos/aidyn-renewed`.
+To try the notes without a release: `tools/release-notes.ps1 -Version 2 -Previous HEAD~5 -RepositoryUrl https://github.com/mdoulos/aidyn-chronicles-enhanced`.
 
 ## Not done yet
 
