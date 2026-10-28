@@ -133,6 +133,8 @@ The file must keep these from the original:
 
 A character whose head is part of the new mesh still has its original head hung from locator 3, because the head is a separate model. Replace the head's model too, with one that keeps only its root node and has no geometry.
 
+The animations can be new ones rather than the original's, as long as each keeps the original's length in ticks, since the game times its states by them. The game moves the character by the root's translation alone, so new animations can hold the root's rotation and scale at rest and carry the body's motion in the bones. A walk's or run's two steps are each half a loop, and an attack should reach its swing's fastest moment at the share of its length the game strikes at, 0.42 for Alaron and 0.4 for a bow shot or a throw ([combat](systems/combat.md)). A death holds its last frame. Alaron's remodel plays clips from Quaternius's CC0 Universal Animation Libraries fitted this way.
+
 Animate the bones by rotation and, for the hips and the root, translation. A bone animated by scale hasn't been tried, and the game handles a part that's both turned and scaled specially.
 
 The game draws the material's base colour texture with its N64 lighting. A normal map carries the detail the triangles leave out: with the Enhancements page's **Surface Detail** on Full, the default, the model is lit at each pixel through it, and on Original at each vertex as the game's own models are. Bake the normal map in the mesh's tangent space with +Y up the image, as Blender does, and include the mesh's tangents in the file. A metal-roughness map is ignored.
