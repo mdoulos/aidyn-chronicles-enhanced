@@ -102,6 +102,12 @@ public sealed class Settings
     /// </summary>
     public bool SurfaceDetail { get; set; } = true;
 
+    /// <summary>
+    /// Whether a model with a skeleton, as a mod's remodelled character has, blends into each new animation rather than cutting to it
+    /// as the original's models do. None of the original's models has a skeleton, so only a mod's look different.
+    /// </summary>
+    public bool AnimationBlending { get; set; } = true;
+
     /// <summary>How many raindrops and snowflakes fall, as a multiple of the original's (<see cref="Particles.WeatherParticles.Density"/>).</summary>
     public float PrecipitationDensity { get; set; } = 1;
 

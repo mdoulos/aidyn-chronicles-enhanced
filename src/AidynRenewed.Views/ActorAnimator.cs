@@ -28,13 +28,29 @@ public sealed class ActorAnimator : IActorMotion
     private readonly MirroredMeshes? _mirroring;
     private readonly HashSet<int> _still;
     private readonly DrivenNodes _driven;
+    private readonly Skeleton3D? _skeleton;
     private double _fraction;
     private int _warned = -1;
+    /// <summary>Each bone's pose as a new animation began, which the skeleton blends from, or null when it isn't blending.</summary>
+    private (Vector3 Position, Quaternion Rotation, Vector3 Scale)[]? _from;
+    private ulong _blendStart;
 
-    private ActorAnimator(ActorMotion motion, AnimationPlayer? player, Node3D? root, MirroredMeshes? mirroring, HashSet<int> still, DrivenNodes driven)
+    /// <summary>
+    /// Whether a skinned model blends from the pose it had into each new animation over <see cref="BlendSeconds"/> (the
+    /// Enhancements page's Animation Blending, Smooth), rather than cutting to it as the original's models do. None of the
+    /// original's models has a skeleton, so only a mod's remodelled character blends.
+    /// </summary>
+    public static bool Blending { get; set; } = true;
+
+    /// <summary>How long a skinned model takes to blend into a new animation.</summary>
+    public const double BlendSeconds = 0.18;
+
+    private ActorAnimator(ActorMotion motion, AnimationPlayer? player, Node3D? root, MirroredMeshes? mirroring, HashSet<int> still, DrivenNodes driven,
+        Skeleton3D? skeleton)
     {
         Motion = motion;
         _driven = driven;
+        _skeleton = skeleton;
         _player = player;
         _still = still;
         _root = root;
@@ -88,7 +104,7 @@ public sealed class ActorAnimator : IActorMotion
         var rootName = SceneNames.Transform(motion.Machine.Actor.RootTransform);
         var root = FindNode(instance, n => n is Node3D && n.Name == rootName) as Node3D;
         return new ActorAnimator(motion, Find<AnimationPlayer>(instance), root, MirroredMeshes.For(instance, glb.Extras),
-            [.. glb.Extras.StillAnimations.Select(a => a.Borg6)], glb.Driven);
+            [.. glb.Extras.StillAnimations.Select(a => a.Borg6)], glb.Driven, Find<Skeleton3D>(instance));
     }
 
     /// <summary>
@@ -161,14 +177,46 @@ public sealed class ActorAnimator : IActorMotion
         }
         if (_player.AssignedAnimation != name)
         {
+            if (Blending && _skeleton is not null && !string.IsNullOrEmpty(_player.AssignedAnimation))
+                StartBlend(_skeleton);
             _player.Play(name);
             _player.Pause();
         }
         _player.Seek(seconds, update: true);
         TransformTracks.Apply(_player, _driven);
+        if (_from is not null && _skeleton is not null)
+            Blend(_skeleton);
         if (_root is not null)
             HoldRoot(_root, _pivot);
         _mirroring?.Update();
+    }
+
+    /// <summary>Keeps each bone's pose as it stands, to blend from into the animation about to start.</summary>
+    private void StartBlend(Skeleton3D skeleton)
+    {
+        _from = new (Vector3, Quaternion, Vector3)[skeleton.GetBoneCount()];
+        for (var i = 0; i < _from.Length; i++)
+            _from[i] = (skeleton.GetBonePosePosition(i), skeleton.GetBonePoseRotation(i), skeleton.GetBonePoseScale(i));
+        _blendStart = Time.GetTicksUsec();
+    }
+
+    /// <summary>Moves each bone from the pose it was blending from toward where the animation now puts it, easing in and out.</summary>
+    private void Blend(Skeleton3D skeleton)
+    {
+        var t = (Time.GetTicksUsec() - _blendStart) / 1e6 / BlendSeconds;
+        if (t >= 1 || !Blending || _from!.Length != skeleton.GetBoneCount())
+        {
+            _from = null;
+            return;
+        }
+        var w = (float)(t * t * (3 - 2 * t));
+        for (var i = 0; i < _from.Length; i++)
+        {
+            var (position, rotation, scale) = _from[i];
+            skeleton.SetBonePosePosition(i, position.Lerp(skeleton.GetBonePosePosition(i), w));
+            skeleton.SetBonePoseRotation(i, rotation.Slerp(skeleton.GetBonePoseRotation(i), w));
+            skeleton.SetBonePoseScale(i, scale.Lerp(skeleton.GetBonePoseScale(i), w));
+        }
     }
 
     /// <summary>

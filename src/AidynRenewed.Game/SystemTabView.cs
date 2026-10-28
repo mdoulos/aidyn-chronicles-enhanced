@@ -27,6 +27,8 @@ public partial class SystemTabView : Control
     /// rows are the list's 16 apart, but on the Controls page.
     /// </summary>
     private const int OptionsTitleTop = 40, OptionsLeft = 84, OptionsTop = 74;
+    /// <summary>The lowest an options row's text may reach, above where the parchment's torn foot rises at the left.</summary>
+    private const int OptionsBottom = 206;
 
     /// <summary>
     /// The Video and Enhancements pages' labels' and values' left edges. The labels clear the System roller, whose inner edge is at
@@ -326,13 +328,16 @@ public partial class SystemTabView : Control
             return ControlPlaces(options).Rows;
         var rows = new List<(int, int)>();
         var y = OptionsTop;
+        // A page with more rows than the parchment holds 16 apart closes them up, as Enhancements' ten do.
+        var lines = options.Rows.Rows.Sum(r => r.Kind == OptionKind.Volume ? 2 : 1);
+        var pitch = lines < 2 ? ListPitch : Math.Min(ListPitch, (OptionsBottom - OptionsTop - _ui.Main.LineHeight) / (lines - 1));
         foreach (var row in options.Rows.Rows)
         {
             if (row.GapBefore)
                 y += OptionsMenu.Gap;
             var volume = row.Kind == OptionKind.Volume;
             rows.Add((y, y + _ui.Main.LineHeight + (volume ? _ui.Size(MenuImages.VolumeBar).Y : 0)));
-            y += volume ? 2 * ListPitch : ListPitch;
+            y += volume ? 2 * pitch : pitch;
         }
         return rows;
     }

@@ -229,7 +229,7 @@ The user laid this out, and it isn't the original's ([ADR 0013](../adr/0013-sett
 - **Audio** lists Sound Volume and Music Volume at x 84, each with its bar under it, taking two lines; no label in the game has a colon, so these don't either.
 - **The bars** are `0x00D7`, a braided rope 152 × 18. Each is drawn whole in (100, 100, 100) at a quarter of the widget's alpha, then again in the rows' colour, cut at 152 × the volume. The volumes are the original's floats from 0 to 1, which the stick steps by 0.01, so the port keeps them in hundredths. They start at 1.0 for sound and 0.65 for music (`app.cpp`). A volume steps every frame the stick is held, from the first, with no wait (not the menus' held repeat).
 - **The cursor's row** pulses from (130, 80, 80) toward dark brown (103, 70, 60), its alpha falling by 12 a step, so it fades nearly out at the deepest. Each channel moves a whole 20th of its way a step, rounded toward zero, so the colour reaches only (110, 80, 60). It steps in the page's draw (`OptionsPage.Draw`, `0x800419c8`), once a frame, and turns at 20, 40 frames a cycle.
-- **Video and Enhancements** list each setting at x 72 with its value at x 204, clear of the System roller's inner edge at about 61. The stick's left and right change the cursor's setting, wrapping round, and so does A. The settings take effect from the next tick and are kept in `settings.json` in the data folder:
+- **Video and Enhancements** list each setting at x 72 with its value at x 204, 16 apart, or closer on a page with more rows than fit above y 206, where the parchment's torn foot rises (`SystemTabView.OptionRows`): Enhancements' ten are 13 apart, clear of the System roller's inner edge at about 61. The stick's left and right change the cursor's setting, wrapping round, and so does A. The settings take effect from the next tick and are kept in `settings.json` in the data folder:
 
   | Page | Setting | Values |
   | --- | --- | --- |
@@ -243,6 +243,7 @@ The user laid this out, and it isn't the original's ([ADR 0013](../adr/0013-sett
   | | Object Distance | Original, 2x, 3x: scene objects, containers among them, and bodies in trek and cut-scenes up to 30 away: see [rendering](rendering.md#draw-distance) |
   | | Model Detail | Original, Highest (the nearest level with a model, where the original draws one: [rendering](rendering.md#draw-distance)) |
   | | Surface Detail | Original, Full (a mod's model that brings a normal map is lit per pixel through it; the default, as only a mod's model shows it: [rendering](rendering.md#normal-maps)) |
+  | | Animation Blending | Original, Smooth (a model with a skeleton, as a mod's remodelled character has, blends into each new animation; the default, as only a mod's model shows it: [rendering](rendering.md#blending-between-animations)) |
   | | Rain and Snow | Original, 2x, 4x, 8x ([weather](weather.md#more-rain-than-the-original)) |
   | | Menu Size | Original (240 lines), Smaller (360), Smallest (480): the UI screen's height, for the menu and trek's popups and box |
   | | Menu Filter | Sharp, Smooth, Video Out (`UiFilter`) |

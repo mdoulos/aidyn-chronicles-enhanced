@@ -357,6 +357,7 @@ public sealed partial class OptionsMenu
                 v => s.ObjectDistance = ObjectDistances[v]),
             Choice("Model Detail", ["Original", "Highest"], () => s.NearestDetail ? 1 : 0, v => s.NearestDetail = v == 1),
             Choice("Surface Detail", ["Original", "Full"], () => s.SurfaceDetail ? 1 : 0, v => s.SurfaceDetail = v == 1),
+            Choice("Animation Blending", ["Original", "Smooth"], () => s.AnimationBlending ? 1 : 0, v => s.AnimationBlending = v == 1),
             Choice("Rain and Snow", ["Original", "2x", "4x", "8x"], () => NearestIndex(PrecipitationDensities, s.PrecipitationDensity),
                 v => s.PrecipitationDensity = PrecipitationDensities[v]),
             Choice("Menu Size", ["Original", "Smaller", "Smallest"], () => Array.IndexOf(UiLines, s.UiLines) is var i and >= 0 ? i : 0,

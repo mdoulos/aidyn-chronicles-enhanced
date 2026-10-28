@@ -6,7 +6,7 @@ namespace AidynRenewed.Game;
 
 /// <summary>
 /// The settings the command line sets for one run (<c>--sky</c>, <c>--object-distance</c>, <c>--draw-distance</c>, <c>--detail</c>,
-/// <c>--surface-detail</c>, <c>--precipitation</c>, <c>--ui-lines</c>, <c>--spell-auras</c> and <c>--pace</c>): a layer over the player's settings,
+/// <c>--surface-detail</c>, <c>--blending</c>, <c>--precipitation</c>, <c>--ui-lines</c>, <c>--spell-auras</c> and <c>--pace</c>): a layer over the player's settings,
 /// which the runtime draws by (<see cref="Over"/>) and makes each tick's <see cref="SessionSettings"/> from
 /// (<see cref="Session"/>), never written into them, so <c>settings.json</c> only ever holds the player's own. Each holds for
 /// the run until the player changes that setting, in the options menu or with a debug key (<see cref="Changed"/>), and then the
@@ -19,6 +19,7 @@ public sealed class LaunchSettings
     private bool? _extendedDrawDistance;
     private bool? _nearestDetail;
     private bool? _surfaceDetail;
+    private bool? _animationBlending;
     private float? _precipitation;
     private int? _uiLines;
     private AuraTurns? _spellAuras;
@@ -35,6 +36,7 @@ public sealed class LaunchSettings
         _extendedDrawDistance = options.ExtendedDrawDistance;
         _nearestDetail = options.NearestDetail;
         _surfaceDetail = options.SurfaceDetail;
+        _animationBlending = options.AnimationBlending;
         _precipitation = options.PrecipitationDensity;
         _uiLines = options.UiLines;
         _spellAuras = options.SpellAuras;
@@ -56,6 +58,8 @@ public sealed class LaunchSettings
             settings.NearestDetail = nearest;
         if (_surfaceDetail is { } surface)
             settings.SurfaceDetail = surface;
+        if (_animationBlending is { } blending)
+            settings.AnimationBlending = blending;
         if (_precipitation is { } precipitation)
             settings.PrecipitationDensity = precipitation;
         if (_uiLines is { } lines)
@@ -85,6 +89,8 @@ public sealed class LaunchSettings
             _nearestDetail = null;
         if (player.SurfaceDetail != _seen.SurfaceDetail)
             _surfaceDetail = null;
+        if (player.AnimationBlending != _seen.AnimationBlending)
+            _animationBlending = null;
         if (player.PrecipitationDensity != _seen.PrecipitationDensity)
             _precipitation = null;
         if (player.UiLines != _seen.UiLines)

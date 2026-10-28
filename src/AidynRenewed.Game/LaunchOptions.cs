@@ -156,6 +156,9 @@ public sealed class LaunchOptions(Dictionary<string, string> values)
     /// <summary><c>--surface-detail original|full</c>: the options' Surface Detail.</summary>
     public bool? SurfaceDetail => Text("surface-detail") is { } detail ? detail == "full" : null;
 
+    /// <summary><c>--blending original|smooth</c>: the options' Animation Blending.</summary>
+    public bool? AnimationBlending => Text("blending") is { } blending ? blending == "smooth" : null;
+
     /// <summary><c>--precipitation &lt;scale&gt;</c>.</summary>
     public float? PrecipitationDensity => Number("precipitation");
 
