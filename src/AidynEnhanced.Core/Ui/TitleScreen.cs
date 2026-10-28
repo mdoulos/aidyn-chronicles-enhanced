@@ -38,7 +38,8 @@ public enum TitlePhase
 /// <para>
 /// <b>The logo</b> (<c>IntroMenu.ShowPressStart</c>, <c>0x800432b4</c>): its shadow, Borg8 <c>0x0104</c>, at (40, 20), the logo,
 /// <c>0x0103</c>, over it at (54, 20), and PRESS START, <c>0x0102</c>, at (123, 205), fade in by 20 a tick. PRESS START blinks
-/// (<c>IntroMenu.Blink</c>, <c>0x80042e5c</c>): hidden for 101 ticks, then shown and hidden 31 ticks each.
+/// (<c>IntroMenu.Blink</c>, <c>0x80042e5c</c>): hidden for 101 ticks, then shown and hidden 31 ticks each. The port shows its own
+/// logo in place of the original's and its shadow (<see cref="LogoBox"/>), the user's choice.
 /// </para>
 /// <para>
 /// <b>The menu</b> comes up over the logo, the logo fading out by 20 a tick as the list fades in, and takes no press until both have
@@ -63,11 +64,17 @@ public sealed class TitleScreen
     /// <summary>The screen's fade out as the title ends: 0.05 a tick (the float at <c>0x800d2190</c>), 20 ticks.</summary>
     public const int LeaveTicks = 20;
 
-    /// <summary>The logo's shadow, the logo and PRESS START (<c>IntroMenu.ShowPressStart</c>).</summary>
-    public static readonly RecordId LogoShadow = Image(0x0104), Logo = Image(0x0103), PressStart = Image(0x0102);
+    /// <summary>PRESS START (<c>IntroMenu.ShowPressStart</c>).</summary>
+    public static readonly RecordId PressStart = Image(0x0102);
 
-    /// <summary>Where the logo's shadow, the logo and PRESS START are drawn in the 320 × 240 frame.</summary>
-    public static readonly (int X, int Y) LogoShadowAt = (40, 20), LogoAt = (54, 20), PressStartAt = (123, 205);
+    /// <summary>Where PRESS START is drawn in the 320 × 240 frame.</summary>
+    public static readonly (int X, int Y) PressStartAt = (123, 205);
+
+    /// <summary>
+    /// The box in the 320 × 240 frame that the port's logo, Aidyn Chronicles Enhanced's (ADR 0033), is fitted to: its opaque part
+    /// over the original's logo's, <c>0x0103</c> at (54, 20), whose place it takes with its shadow's, <c>0x0104</c> at (40, 20).
+    /// </summary>
+    public static readonly (int X, int Y, int Width, int Height) LogoBox = (56, 19, 186, 178);
 
     /// <summary>PRESS START's blink (<c>IntroMenu.Blink</c>): it counts to 101 and goes back to 70, turning on or off each time.</summary>
     public const int BlinkTop = 101, BlinkBack = 70;

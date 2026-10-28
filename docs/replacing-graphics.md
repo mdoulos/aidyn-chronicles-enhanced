@@ -105,6 +105,7 @@ UI images and sprites are plain PNG files, and any PNG an image editor saves wil
 - **The sky's gradients are data, not pictures.** Each is 12 columns by 37 rows. A column is one time of day, every two hours from midnight, and the game blends between neighbouring columns. The top 32 rows are the sky from the top of the screen down. The last 5 set the tint on the scenery and the colours of the fog, clouds and sun, so repainting them recolours the whole area, not just the sky. A replacement must be exactly 12 by 37, or the game ignores it.
 - **Transparency comes from the alpha channel.** Keep the transparent areas transparent, or a portrait or icon gets a box around it.
 - **Colours are drawn as you paint them.** The game shows the image's colours as they are, the way the N64 did, before any lighting or tint the game applies.
+- **The title's logo isn't one of them.** The title screen shows Aidyn Chronicles Enhanced's own logo, which is part of the game rather than an image in a plugin, so replacing the original's logo, image `0x0103`, or its shadow, `0x0104`, changes nothing. PRESS START and the title's menu are images as usual.
 
 ## Models
 

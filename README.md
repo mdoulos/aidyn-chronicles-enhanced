@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/branding/ace-logo-full.png" alt="Aidyn Chronicles: The First Mage, Enhanced" width="420"></p>
+
 # Aidyn Chronicles Enhanced
 
 A PC port of the engine that runs Aidyn Chronicles: The First Mage for the

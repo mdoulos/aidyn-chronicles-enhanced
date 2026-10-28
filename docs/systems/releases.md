@@ -32,7 +32,7 @@ The **MSI** (`packaging/windows/AidynEnhanced.wxs`, WiX 6.0.2 from the repositor
 
 The **portable zip** is the same folder with `portable.txt` beside the executables, which tells Aidyn Chronicles Enhanced to keep its data in that folder.
 
-The executables carry the logo (`assets/branding/ace-icon.ico`) and version resources: product name "Aidyn Chronicles Enhanced" or "Aidyn Chronicles Enhanced Editor", company and copyright mdoulos, file and product version `N.0.0.0`. Neither package is signed, so SmartScreen may warn on the first run ("More info", then "Run anyway").
+The executables carry the icon, ACE's (`assets/branding/ace-icon.ico`), and version resources: product name "Aidyn Chronicles Enhanced" or "Aidyn Chronicles Enhanced Editor", company and copyright mdoulos, file and product version `N.0.0.0`. Neither package is signed, so SmartScreen may warn on the first run ("More info", then "Run anyway").
 
 ### Linux
 
@@ -64,7 +64,7 @@ tools/package.ps1                # as release 0
 The script:
 
 1. Fetches the pinned Godot editor and the .NET export templates into `.tools/godot/` (`tools/godot-pin.ps1`, which `tools/godot.ps1` shares), each checked against the SHA-512 in the release's `SHA512-SUMS.txt`. The templates come as one 1.2 GB `.tpz` of every platform; only the four desktop release files are kept, in the self-contained editor's `editor_data/export_templates/4.7.2.stable.mono/`.
-2. For each project, puts in place what its export needs and takes it away after: `config/version="N"` in `project.godot` (committed as `"0"`), which Godot gives to the Windows version resources and the macOS bundle versions; copies of `assets/branding/ace-icon.ico` and `ace-icon.icns` as `icon.ico` and `icon.icns`, which the presets name (gitignored, and excluded from the PCK); and `<assembly>.sln`, which Godot's .NET export refuses to run without, though it publishes the `.csproj` (the repository's solution is `AidynEnhanced.slnx`). `icon.png`, the project's `config/icon`, is a committed copy of `assets/branding/logo.png`, refreshed if they differ.
+2. For each project, puts in place what its export needs and takes it away after: `config/version="N"` in `project.godot` (committed as `"0"`), which Godot gives to the Windows version resources and the macOS bundle versions; copies of `assets/branding/ace-icon.ico` and `ace-icon.icns` as `icon.ico` and `icon.icns`, which the presets name (gitignored, and excluded from the PCK); and `<assembly>.sln`, which Godot's .NET export refuses to run without, though it publishes the `.csproj` (the repository's solution is `AidynEnhanced.slnx`). `icon.png`, the project's `config/icon`, `splash.png`, its boot splash, and the game's `logo.png`, the title's logo, are committed copies of `assets/branding`'s `ace-icon-256.png`, `ace-splash.png` and `ace-logo-full.png` ([branding](../../assets/branding/README.md)), refreshed if they differ.
 3. Imports and exports each project headless with its preset (`--export-release`). Godot exits 0 from a failed .NET export, so the script fails on any `ERROR:` line, and keeps Godot's output in `out/packages/work-<platform>/logs/`.
 4. Lays out the folder in `out/packages/work-<platform>/` and writes the packages to `out/packages/`.
 

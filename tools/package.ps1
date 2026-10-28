@@ -107,10 +107,14 @@ function Export-App($app, [string]$preset, [string]$target) {
     $original = [IO.File]::ReadAllBytes($projectFile)
     $created = @()
     try {
-        # The icons the presets name. The PNG is committed (it's the project's icon);
-        # the .ico and .icns are only needed here, and are gitignored.
+        # The icons the presets name. The PNGs are committed (the project's icon, its boot
+        # splash and the game's title logo); the .ico and .icns are only needed here, and
+        # are gitignored.
         $branding = Join-Path $repo 'assets/branding'
-        Copy-IfChanged (Join-Path $branding 'logo.png') (Join-Path $dir 'icon.png')
+        foreach ($image in @(@('ace-icon-256.png', 'icon.png'), @('ace-splash.png', 'splash.png'), @('ace-logo-full.png', 'logo.png'))) {
+            $to = Join-Path $dir $image[1]
+            if (Test-Path -LiteralPath $to) { Copy-IfChanged (Join-Path $branding $image[0]) $to }
+        }
         foreach ($icon in @(@('ace-icon.ico', 'icon.ico'), @('ace-icon.icns', 'icon.icns'))) {
             $to = Join-Path $dir $icon[1]
             if (-not (Test-Path -LiteralPath $to)) { $created += $to }

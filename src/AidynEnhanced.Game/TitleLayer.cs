@@ -9,7 +9,8 @@ namespace AidynEnhanced.Game;
 /// The title screen over the world (<see cref="TitleScreen"/>): the intro cards on black, then over the fly-through's scenery the logo
 /// and PRESS START, and the menu, the System tab's pages on their feathered boxes (<see cref="SystemTabView"/> in the title's style).
 /// All of it is drawn in the original's 320 × 240 frame at the centre of a UI screen of its own, so it shrinks with the Menu Size
-/// setting as the menus do. The session steps the title; this draws what each tick left (<see cref="Draw"/>).
+/// setting as the menus do, but for the port's logo, which is drawn under that screen at the window's resolution (<see cref="LogoView"/>).
+/// The session steps the title; this draws what each tick left (<see cref="Draw"/>).
 /// </summary>
 public partial class TitleLayer : CanvasLayer
 {
@@ -17,7 +18,8 @@ public partial class TitleLayer : CanvasLayer
     private readonly ColorRect _black = new() { Name = "Cards' black", Color = Colors.Black, MouseFilter = Control.MouseFilterEnum.Ignore };
     private readonly ColorRect _fade = new() { Name = "Fade", Color = Colors.Transparent, MouseFilter = Control.MouseFilterEnum.Ignore };
     private readonly TitleView _view;
-    private readonly NintendoLogoView _logo;
+    private readonly LogoView _logo;
+    private readonly NintendoLogoView _nintendoLogo;
     private SystemTabView? _menu;
     private readonly PluginSet _plugins;
 
@@ -30,13 +32,17 @@ public partial class TitleLayer : CanvasLayer
         Visible = false;
         _black.SetAnchorsPreset(Control.LayoutPreset.FullRect);
         AddChild(_black);
+        _view = new TitleView(new UiPainter(plugins), plugins.All<StringsRecord>(RecordTypes.Strings).FirstOrDefault(s => s.Name == "Copyright")?.Lines ?? []);
+        _view.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        // The logo under the screen, so the menu comes up over it as the original's does.
+        _logo = new LogoView(_screen, _view);
+        _logo.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(_logo);
         _screen.SetAnchorsPreset(Control.LayoutPreset.FullRect);
         AddChild(_screen);
         // The N64 logo's scene under its caption.
-        _logo = new NintendoLogoView(models) { Visible = false };
-        _screen.Canvas.AddChild(_logo);
-        _view = new TitleView(new UiPainter(plugins), plugins.All<StringsRecord>(RecordTypes.Strings).FirstOrDefault(s => s.Name == "Copyright")?.Lines ?? []);
-        _view.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _nintendoLogo = new NintendoLogoView(models) { Visible = false };
+        _screen.Canvas.AddChild(_nintendoLogo);
         _screen.Canvas.AddChild(_view);
         _fade.SetAnchorsPreset(Control.LayoutPreset.FullRect);
         AddChild(_fade);
@@ -57,11 +63,12 @@ public partial class TitleLayer : CanvasLayer
     public void Draw(TitleScreen title)
     {
         _view.Title = title;
+        _logo.Title = title;
         _black.Visible = title.Phase == TitlePhase.Cards;
         var cards = title.Cards;
-        _logo.Visible = cards is { Ended: false, Card: IntroCard.Nintendo };
-        if (_logo.Visible)
-            _logo.Pose(cards!.LogoAngle, cards.Alpha, _view.Origin);
+        _nintendoLogo.Visible = cards is { Ended: false, Card: IntroCard.Nintendo };
+        if (_nintendoLogo.Visible)
+            _nintendoLogo.Pose(cards!.LogoAngle, cards.Alpha, _view.Origin);
         if (title.Menu is { } menu)
         {
             if (_menu is null)
@@ -74,6 +81,7 @@ public partial class TitleLayer : CanvasLayer
         }
         _fade.Color = new Color(0, 0, 0, 1 - title.Brightness);
         _view.QueueRedraw();
+        _logo.QueueRedraw();
     }
 
     /// <summary>The title has ended: the layer hides, and the menu's view goes with this title's menu.</summary>
@@ -81,7 +89,8 @@ public partial class TitleLayer : CanvasLayer
     {
         Visible = false;
         _view.Title = null;
-        _logo.Visible = false;
+        _logo.Title = null;
+        _nintendoLogo.Visible = false;
         _menu?.QueueFree();
         _menu = null;
     }
@@ -90,10 +99,11 @@ public partial class TitleLayer : CanvasLayer
     public void Redraw()
     {
         _view.QueueRedraw();
+        _logo.QueueRedraw();
         _menu?.QueueRedraw();
     }
 
-    /// <summary>The cards and the logo, in the 320 × 240 frame at the screen's centre.</summary>
+    /// <summary>The cards and PRESS START, in the 320 × 240 frame at the screen's centre.</summary>
     private sealed partial class TitleView(UiPainter ui, IReadOnlyList<string> legal) : Control
     {
         private const int FrameWidth = 320, FrameHeight = 240;
@@ -119,7 +129,7 @@ public partial class TitleLayer : CanvasLayer
             if (title.Cards is { Ended: false } cards)
                 Card(cards);
             else if (title.LogoAlpha > 0)
-                Logo(title);
+                PressStart(title);
             DrawSetTransform(Vector2.Zero);
         }
 
@@ -164,20 +174,57 @@ public partial class TitleLayer : CanvasLayer
             }
         }
 
-        /// <summary>The logo's shadow, the logo over it, and PRESS START while it blinks on, all at the logo's alpha.</summary>
-        private void Logo(TitleScreen title)
+        /// <summary>PRESS START while it blinks on, at the logo's alpha. The logo is drawn under the screen (<see cref="LogoView"/>).</summary>
+        private void PressStart(TitleScreen title)
         {
-            var color = new Rgba(255, 255, 255, (byte)title.LogoAlpha);
-            ui.Image(this, TitleScreen.LogoShadow, TitleScreen.LogoShadowAt.X, TitleScreen.LogoShadowAt.Y, color: color);
-            ui.Image(this, TitleScreen.Logo, TitleScreen.LogoAt.X, TitleScreen.LogoAt.Y, color: color);
             if (title.PressStartShown && title.Menu is null)
-                ui.Image(this, TitleScreen.PressStart, TitleScreen.PressStartAt.X, TitleScreen.PressStartAt.Y, color: color);
+                ui.Image(this, TitleScreen.PressStart, TitleScreen.PressStartAt.X, TitleScreen.PressStartAt.Y,
+                    color: new Rgba(255, 255, 255, (byte)title.LogoAlpha));
         }
 
         private void Centred(RecordId image, Rgba color)
         {
             var size = ui.Size(image);
             ui.Image(this, image, (FrameWidth - size.X) / 2, (FrameHeight - size.Y) / 2, color: color);
+        }
+    }
+
+    /// <summary>
+    /// The port's logo, Aidyn Chronicles Enhanced's full logo (ADR 0033, <c>res://logo.png</c>), in place of the original's and its
+    /// shadow, at the logo's alpha: fitted to <see cref="TitleScreen.LogoBox"/> in the frame as the title's screen shows it, but drawn
+    /// at the window's resolution rather than in the screen's pixels, so its detail shows at any size, and filtered from its mipmaps.
+    /// </summary>
+    private sealed partial class LogoView(UiScreen screen, TitleView frame) : Control
+    {
+        private readonly Texture2D? _texture = ResourceLoader.Load<Texture2D>("res://logo.png");
+
+        public TitleScreen? Title { get; set; }
+
+        public override void _Ready()
+        {
+            Name = "Logo";
+            MouseFilter = MouseFilterEnum.Ignore;
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps;
+        }
+
+        public override void _Notification(int what)
+        {
+            if (what == NotificationResized)
+                QueueRedraw();
+        }
+
+        public override void _Draw()
+        {
+            if (_texture is null || Title is not { LogoAlpha: > 0 } title || title.Cards is { Ended: false })
+                return;
+            // The frame's pixels on the window: the screen's canvas is scaled to fit the screen's rectangle.
+            var shown = screen.ScreenRect;
+            var scale = shown.Size.Y / screen.CanvasSize.Y;
+            var box = TitleScreen.LogoBox;
+            var size = _texture.GetSize();
+            var drawn = size * Math.Min(box.Width / size.X, box.Height / size.Y) * scale;
+            var centre = shown.Position + (frame.Origin + new Vector2(box.X + box.Width / 2f, box.Y + box.Height / 2f)) * scale;
+            DrawTextureRect(_texture, new Rect2(centre - drawn / 2, drawn), false, new Color(1, 1, 1, title.LogoAlpha / 255f));
         }
     }
 
