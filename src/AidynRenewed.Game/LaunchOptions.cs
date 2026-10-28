@@ -153,6 +153,9 @@ public sealed class LaunchOptions(Dictionary<string, string> values)
     /// <summary><c>--detail nearest</c>: model detail's Highest.</summary>
     public bool? NearestDetail => Text("detail") is { } detail ? detail == "nearest" : null;
 
+    /// <summary><c>--surface-detail original|full</c>: the options' Surface Detail.</summary>
+    public bool? SurfaceDetail => Text("surface-detail") is { } detail ? detail == "full" : null;
+
     /// <summary><c>--precipitation &lt;scale&gt;</c>.</summary>
     public float? PrecipitationDensity => Number("precipitation");
 

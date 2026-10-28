@@ -242,6 +242,7 @@ The user laid this out, and it isn't the original's ([ADR 0013](../adr/0013-sett
   | Enhancements | Draw Distance | Original, Extended (the Overworld's terrain out to the 5 × 5 chunks round the player: [rendering](rendering.md#draw-distance)) |
   | | Object Distance | Original, 2x, 3x: scene objects, containers among them, and bodies in trek and cut-scenes up to 30 away: see [rendering](rendering.md#draw-distance) |
   | | Model Detail | Original, Highest (the nearest level with a model, where the original draws one: [rendering](rendering.md#draw-distance)) |
+  | | Surface Detail | Original, Full (a mod's model that brings a normal map is lit per pixel through it; the default, as only a mod's model shows it: [rendering](rendering.md#normal-maps)) |
   | | Rain and Snow | Original, 2x, 4x, 8x ([weather](weather.md#more-rain-than-the-original)) |
   | | Menu Size | Original (240 lines), Smaller (360), Smallest (480): the UI screen's height, for the menu and trek's popups and box |
   | | Menu Filter | Sharp, Smooth, Video Out (`UiFilter`) |

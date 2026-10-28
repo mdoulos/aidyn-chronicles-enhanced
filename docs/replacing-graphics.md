@@ -135,7 +135,7 @@ A character whose head is part of the new mesh still has its original head hung 
 
 Animate the bones by rotation and, for the hips and the root, translation. A bone animated by scale hasn't been tried, and the game handles a part that's both turned and scaled specially.
 
-The game draws the material's base colour texture with its N64 lighting, which is worked out at each vertex. A normal map and a metal-roughness map are ignored, so detail that only they carry doesn't show.
+The game draws the material's base colour texture with its N64 lighting. A normal map carries the detail the triangles leave out: with the Enhancements page's **Surface Detail** on Full, the default, the model is lit at each pixel through it, and on Original at each vertex as the game's own models are. Bake the normal map in the mesh's tangent space with +Y up the image, as Blender does, and include the mesh's tangents in the file. A metal-roughness map is ignored.
 
 ## Textures on models
 

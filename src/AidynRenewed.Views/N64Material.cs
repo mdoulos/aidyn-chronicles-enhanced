@@ -104,6 +104,8 @@ public static class N64Material
     public const string SunColorParameter = "n64_sun_color";
     /// <summary>Global: bodies' ambient light, half <c>gSkyColor</c>, in on-screen values.</summary>
     public const string BodyAmbientParameter = "n64_body_ambient";
+    /// <summary>Global: 1 where a material with a normal map is lit per pixel through it, 0 where it's lit per vertex (<see cref="SetSurfaceDetail"/>).</summary>
+    public const string SurfaceDetailParameter = "n64_surface_detail";
     /// <summary>Per material: how far a scrolling texture has moved toward +S, as a share of its width.</summary>
     public const string ScrollParameter = "scroll";
     /// <summary>A textured material's metadata: its texture's Borg1 archive index.</summary>
@@ -170,6 +172,18 @@ public static class N64Material
         RenderingServer.GlobalShaderParameterAdd(SunDirectionParameter, RenderingServer.GlobalShaderParameterType.Vec3, new Vector3(0, 1, 0));
         RenderingServer.GlobalShaderParameterAdd(SunColorParameter, RenderingServer.GlobalShaderParameterType.Vec3, new Vector3(0, 0, 0));
         RenderingServer.GlobalShaderParameterAdd(BodyAmbientParameter, RenderingServer.GlobalShaderParameterType.Vec3, new Vector3(1, 1, 1));
+        RenderingServer.GlobalShaderParameterAdd(SurfaceDetailParameter, RenderingServer.GlobalShaderParameterType.Float, 1f);
+    }
+
+    /// <summary>
+    /// Whether a lit material that brings a normal map is lit per pixel through it (the Surface Detail setting's Full) or per vertex
+    /// as the RSP lights every other model. The original's models have no normal maps; a mod's remodelled character does, which
+    /// carries the detail its few triangles leave out.
+    /// </summary>
+    public static void SetSurfaceDetail(bool full)
+    {
+        DeclareGlobals();
+        RenderingServer.GlobalShaderParameterSet(SurfaceDetailParameter, full ? 1f : 0f);
     }
 
     /// <summary>
@@ -466,7 +480,14 @@ public static class N64Material
         // A lit display list with G_TEXTURE_GEN (Borg2 flag 0x1) takes its texture coordinates from its normals.
         var texgen = albedo is not null && !unlit && m.TryGetProperty("extras", out var flagExtras) &&
             flagExtras.TryGetProperty(ExtrasKeys.Borg2Flags, out var borg2Flags) && (borg2Flags.GetUInt32() & EnvironmentMapFlag) != 0;
-        var material = new ShaderMaterial { Shader = ShaderFor(unlit, cull, nearest, blend, albedo is not null, texgen) };
+        // A mod's lit model may bring a normal map, which none of the original's has (SetSurfaceDetail).
+        Texture2D? normals = null;
+        if (!unlit && !texgen && m.TryGetProperty("normalTexture", out var normalInfo))
+            normals = texture(root.GetProperty("textures")[normalInfo.GetProperty("index").GetInt32()].GetProperty("source").GetInt32());
+        var mapped = normals is not null;
+        var material = new ShaderMaterial { Shader = ShaderFor(unlit, cull, nearest, blend, albedo is not null, texgen, normalMapped: mapped) };
+        if (normals is not null)
+            material.SetShaderParameter("normal_texture", normals);
         // Back to on-screen values; alpha was never gamma-encoded.
         var onScreen = factor.LinearToSrgb();
         // A Vector4, not a Color: Duplicate() resets a Color set on a vec4 uniform to the default,
@@ -484,9 +505,9 @@ public static class N64Material
         if (m.TryGetProperty("extras", out var extras) && extras.TryGetProperty(ExtrasKeys.Borg1, out var borg1))
             material.SetMeta(Borg1Meta, borg1.GetInt32());
         if (blend == Blend.Mask)
-            FadedShaders.Add(material, ShaderFor(unlit, cull, nearest, Blend.Blend, albedo is not null, texgen));
+            FadedShaders.Add(material, ShaderFor(unlit, cull, nearest, Blend.Blend, albedo is not null, texgen, normalMapped: mapped));
         if (cull)
-            MirroredShaders.Add(material, ShaderFor(unlit, cull, nearest, blend, albedo is not null, texgen, mirrored: true));
+            MirroredShaders.Add(material, ShaderFor(unlit, cull, nearest, blend, albedo is not null, texgen, mirrored: true, normalMapped: mapped));
         return material;
 
         static Wrap ToWrap(JsonElement sampler, string name) =>
@@ -519,11 +540,13 @@ public static class N64Material
         """;
 
     /// <summary>A shader for a material's fixed state. Each combination is compiled once.</summary>
-    private static Shader ShaderFor(bool unlit, bool cull, bool nearest, Blend blend, bool textured, bool texgen, bool mirrored = false)
+    private static Shader ShaderFor(bool unlit, bool cull, bool nearest, Blend blend, bool textured, bool texgen, bool mirrored = false,
+        bool normalMapped = false)
     {
         var rsp = RspLighting && !unlit;
         var onScreen = OnScreenFramebuffer && (unlit || rsp);
-        var key = $"{unlit} {rsp} {onScreen} {cull} {nearest} {blend} {textured} {texgen} {mirrored}";
+        var perPixel = rsp && normalMapped;
+        var key = $"{unlit} {rsp} {onScreen} {cull} {nearest} {blend} {textured} {texgen} {mirrored} {perPixel}";
         // Scenery is built off the main thread too (docs/adr/0025-chunks-load-off-the-main-thread.md). The lock is held for the
         // cache alone, never while the renderer compiles, which another thread may have to wait on the main thread for: two
         // threads wanting a new shader at once each compile one, and the first kept is used from then on.
@@ -532,12 +555,13 @@ public static class N64Material
             if (Shaders.TryGetValue(key, out var cached))
                 return cached;
         }
-        var shader = CompileShader(unlit, rsp, onScreen, cull, nearest, blend, textured, texgen, mirrored);
+        var shader = CompileShader(unlit, rsp, onScreen, cull, nearest, blend, textured, texgen, mirrored, perPixel);
         lock (Shaders)
             return Shaders.TryAdd(key, shader) ? shader : Shaders[key];
     }
 
-    private static Shader CompileShader(bool unlit, bool rsp, bool onScreen, bool cull, bool nearest, Blend blend, bool textured, bool texgen, bool mirrored)
+    private static Shader CompileShader(bool unlit, bool rsp, bool onScreen, bool cull, bool nearest, Blend blend, bool textured, bool texgen, bool mirrored,
+        bool perPixel)
     {
         Shader shader;
 
@@ -566,16 +590,64 @@ public static class N64Material
 
                 	// The RSP's lighting, per vertex, in on-screen values.
                 	vec3 normal = normalize(MODEL_NORMAL_MATRIX * NORMAL);
+                	// The engine's lights (a body's, an actor's) reach only the first vertex of each pair the RSP loads; UV2's x is 1 on
+                	// the second, which takes the ambient alone. A scene's own lights fill both copies and reach every vertex.
+                	float reach = lighting == 3 ? 1.0 : 1.0 - UV2.x;
+                	vec3 lit_shade = rsp_shade(normal, reach);
+                """
+            : "";
+        // The RSP's light: the ambient, then the sun and the lights each by the cosine to them, clamped to 1, in on-screen values.
+        var shadeFunction = rsp
+            ? """
+
+                vec3 rsp_shade(vec3 normal, float reach) {
                 	vec3 ambient = lighting == 1 ? (body_ambient.a > 0.0 ? body_ambient.rgb : n64_body_ambient) : lighting == 2 ? n64_tint
                 		: lighting == 3 ? own_ambient : vec3(1.0);
                 	vec3 lights = lighting == 0 ? vec3(0.0)
                 		: (lighting == 3 ? vec3(0.0) : n64_sun_color * max(dot(normal, n64_sun_direction), 0.0))
                 		+ light0_color * max(dot(normal, light0_direction), 0.0) + light1_color * max(dot(normal, light1_direction), 0.0)
                 		+ light2_color * max(dot(normal, light2_direction), 0.0) + light3_color * max(dot(normal, light3_direction), 0.0);
-                	// The engine's lights (a body's, an actor's) reach only the first vertex of each pair the RSP loads; UV2's x is 1 on
-                	// the second, which takes the ambient alone. A scene's own lights fill both copies and reach every vertex.
-                	float reach = lighting == 3 ? 1.0 : 1.0 - UV2.x;
-                	vec3 lit_shade = min(ambient + lights * reach, vec3(1.0));
+                	return min(ambient + lights * reach, vec3(1.0));
+                }
+                """
+            : "";
+        // A normal-mapped material keeps its frame for the pixels: the same light, at each pixel, through the map.
+        var perPixelUniforms = perPixel
+            ? """
+
+
+                // A mod's normal map, in its mesh's tangent space, +Y up the image; the setting, and the frame each pixel is lit in.
+                uniform sampler2D normal_texture : hint_normal, filter_linear_mipmap, repeat_enable;
+                global uniform float n64_surface_detail;
+                varying vec3 world_normal;
+                varying vec3 world_tangent;
+                varying vec3 world_binormal;
+                varying float light_reach;
+                """
+            : "";
+        var perPixelVertex = perPixel
+            ? """
+
+                	world_normal = normal;
+                	world_tangent = (MODEL_MATRIX * vec4(TANGENT, 0.0)).xyz;
+                	world_binormal = (MODEL_MATRIX * vec4(BINORMAL, 0.0)).xyz;
+                	light_reach = reach;
+                """
+            : "";
+        var perPixelShade = perPixel
+            ? """
+
+                	if (n64_surface_detail > 0.5 && dot(world_tangent, world_tangent) > 1e-8) {
+                		vec3 n = normalize(world_normal);
+                		vec3 t = normalize(world_tangent - n * dot(n, world_tangent));
+                		// The map's +Y is up its image, which is toward lower V here. Turn the binormal that way, whichever way round the
+                		// mesh's tangents were made, by the way V runs across the surface at this pixel.
+                		vec3 at = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+                		vec3 v_runs = cross(dFdy(at), n) * dFdx(UV).y + cross(n, dFdx(at)) * dFdy(UV).y;
+                		vec3 b = normalize(world_binormal) * (dot(world_binormal, v_runs) > 0.0 ? -1.0 : 1.0);
+                		vec3 m = texture(normal_texture, UV).xyz * 2.0 - 1.0;
+                		shade = vec4(rsp_shade(normalize(t * m.x + b * m.y + n * m.z), light_reach), 1.0);
+                	}
                 """
             : "";
         var fog = onScreen
@@ -643,13 +715,14 @@ public static class N64Material
                 uniform ivec2 wrap;
                 // How far a scrolling texture's image has moved toward +S, as a share of its width.
                 uniform float scroll = 0.0;
-                uniform float alpha_scissor = 0.5;
+                uniform float alpha_scissor = 0.5;{{perPixelUniforms}}
 
                 // The shade and the fog times the vertex's clip-space w, and that w. Dividing them again undoes Godot's
                 // perspective-correct interpolation, so they're interpolated straight across the screen as the RDP's are.
                 varying vec4 shade_w;
                 varying float fog_w;
                 varying float clip_w;
+                {{shadeFunction}}
 
                 vec3 to_screen(vec3 c) {
                 	return mix(1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, c * 12.92, lessThan(c, vec3(0.0031308)));
@@ -678,7 +751,7 @@ public static class N64Material
                 	vec3 seen = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
                 	float depth = max(n64_radial > 0.0 ? length(seen) : -seen.z, 0.0001);
                 	float z = (far + near) / (far - near) - 2.0 * far * near / ((far - near) * depth);
-                	float fog = far > near && lighting != 3 && unfogged == 0.0 ? clamp((z * 500.0 + 500.0 - n64_fog.x) / (n64_fog.y - n64_fog.x), 0.0, 1.0) : 0.0;{{light}}{{(texgen ? TexGen : "")}}
+                	float fog = far > near && lighting != 3 && unfogged == 0.0 ? clamp((z * 500.0 + 500.0 - n64_fog.x) / (n64_fog.y - n64_fog.x), 0.0, 1.0) : 0.0;{{light}}{{perPixelVertex}}{{(texgen ? TexGen : "")}}
                 	clip_w = max((PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0))).w, 0.0001);
                 	shade_w = {{vertexShade}} * clip_w;
                 	fog_w = fog * clip_w;
@@ -702,7 +775,7 @@ public static class N64Material
                 		}
                 	}
                 	{{texel}}
-                	vec4 shade = shade_w / clip_w;
+                	vec4 shade = shade_w / clip_w;{{perPixelShade}}
                 	float fog = fog_w / clip_w;
                 	vec3 tint = scene_tint.a > 0.0 ? scene_tint.rgb
                 		: lighting != 0 ? vec3(1.0) : (object_tint.a > 0.0 ? (n64_tint + object_tint.rgb) * 0.5 : n64_tint);

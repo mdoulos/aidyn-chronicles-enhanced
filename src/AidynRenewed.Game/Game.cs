@@ -436,6 +436,7 @@ public partial class Game : Node3D, ITrekHost, IPauseMenuHost, ICombatHost
         ApplyWorldLines();
         _objectDistance = new ObjectDistance(s.ObjectDistance, s.NearestDetail);
         _extendedDrawDistance = s.ExtendedDrawDistance;
+        N64Material.SetSurfaceDetail(s.SurfaceDetail);
         _cinematic?.Viewport.Msaa3D = GetViewport().Msaa3D;
         foreach (var screen in new[] { _menu?.Screen, _backdrop?.Screen, _cinematic?.Screen, _credits?.Screen, _titleLayer?.Screen, _trekScreen })
         {

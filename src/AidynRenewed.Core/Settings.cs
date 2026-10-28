@@ -96,6 +96,12 @@ public sealed class Settings
     /// <summary>Whether scene objects always draw their nearest, most detailed level.</summary>
     public bool NearestDetail { get; set; }
 
+    /// <summary>
+    /// Whether a model that brings a normal map, as a mod's remodelled character does, is lit per pixel through it rather than per
+    /// vertex as the original's models are. None of the original's models has one, so only a mod's look differently.
+    /// </summary>
+    public bool SurfaceDetail { get; set; } = true;
+
     /// <summary>How many raindrops and snowflakes fall, as a multiple of the original's (<see cref="Particles.WeatherParticles.Density"/>).</summary>
     public float PrecipitationDensity { get; set; } = 1;
 

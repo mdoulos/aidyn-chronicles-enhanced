@@ -6,7 +6,7 @@ namespace AidynRenewed.Game;
 
 /// <summary>
 /// The settings the command line sets for one run (<c>--sky</c>, <c>--object-distance</c>, <c>--draw-distance</c>, <c>--detail</c>,
-/// <c>--precipitation</c>, <c>--ui-lines</c>, <c>--spell-auras</c> and <c>--pace</c>): a layer over the player's settings,
+/// <c>--surface-detail</c>, <c>--precipitation</c>, <c>--ui-lines</c>, <c>--spell-auras</c> and <c>--pace</c>): a layer over the player's settings,
 /// which the runtime draws by (<see cref="Over"/>) and makes each tick's <see cref="SessionSettings"/> from
 /// (<see cref="Session"/>), never written into them, so <c>settings.json</c> only ever holds the player's own. Each holds for
 /// the run until the player changes that setting, in the options menu or with a debug key (<see cref="Changed"/>), and then the
@@ -18,6 +18,7 @@ public sealed class LaunchSettings
     private float? _objectDistance;
     private bool? _extendedDrawDistance;
     private bool? _nearestDetail;
+    private bool? _surfaceDetail;
     private float? _precipitation;
     private int? _uiLines;
     private AuraTurns? _spellAuras;
@@ -33,6 +34,7 @@ public sealed class LaunchSettings
         _objectDistance = options.ObjectDistance;
         _extendedDrawDistance = options.ExtendedDrawDistance;
         _nearestDetail = options.NearestDetail;
+        _surfaceDetail = options.SurfaceDetail;
         _precipitation = options.PrecipitationDensity;
         _uiLines = options.UiLines;
         _spellAuras = options.SpellAuras;
@@ -52,6 +54,8 @@ public sealed class LaunchSettings
             settings.ExtendedDrawDistance = extended;
         if (_nearestDetail is { } nearest)
             settings.NearestDetail = nearest;
+        if (_surfaceDetail is { } surface)
+            settings.SurfaceDetail = surface;
         if (_precipitation is { } precipitation)
             settings.PrecipitationDensity = precipitation;
         if (_uiLines is { } lines)
@@ -79,6 +83,8 @@ public sealed class LaunchSettings
             _extendedDrawDistance = null;
         if (player.NearestDetail != _seen.NearestDetail)
             _nearestDetail = null;
+        if (player.SurfaceDetail != _seen.SurfaceDetail)
+            _surfaceDetail = null;
         if (player.PrecipitationDensity != _seen.PrecipitationDensity)
             _precipitation = null;
         if (player.UiLines != _seen.UiLines)
