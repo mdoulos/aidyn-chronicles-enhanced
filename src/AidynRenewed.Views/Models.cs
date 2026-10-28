@@ -131,7 +131,8 @@ public sealed class Models(PluginSet plugins) : IDisposable
     }
 
     /// <summary>
-    /// An actor's scene with its head, if it has one, and an animator running its state machine.
+    /// An actor's scene with its head, if it has one, and an animator running its state machine. An actor with outfits draws the
+    /// one worn by no character until its view says whose it is (<see cref="OutfitSwitch.Wearer"/>).
     /// </summary>
     /// <param name="lighting">How it's lit: as a body, unless it's a scene object's.</param>
     /// <param name="rolls">The stream its branches roll on: a body's are <see cref="BodyRolls"/>; by default its own, from 0.</param>
@@ -155,6 +156,7 @@ public sealed class Models(PluginSet plugins) : IDisposable
             else
                 GD.PushWarning($"{actor.Scene} has no {locatorName} for its head.");
         }
+        OutfitSwitch.Add(actor, node);
         N64Material.SetLighting(node, lighting);
         var animator = motion is not null
             ? ActorAnimator.Create(node, motion, Glb(actor.Scene)!)

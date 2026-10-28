@@ -14,8 +14,24 @@ namespace AidynRenewed.Plugins.Records;
 /// <c>Bodies.Process</c> (<c>0x80012784</c>) skips any other's (<c>Body.AlwaysAnimated</c>, <c>0x800CDA50</c>): the bat, wyvern, harpy,
 /// dryads, Pandara, gryphon, manticore and scorpion, nine actors. The port steps every body's animation, so nothing reads it yet.
 /// </param>
+/// <param name="Outfits">
+/// The looks its character wears by what it has on, a port addition for a mod's remodelled character; the original's actors have
+/// none, and every mesh of their scenes is drawn.
+/// </param>
 public sealed record ActorRecord(RecordId Id, RecordId Scene, int RootTransform, int InitialState, IReadOnlyList<ActorState> States,
-    ActorHead? Head = null, bool AlwaysAnimated = false);
+    ActorHead? Head = null, bool AlwaysAnimated = false, IReadOnlyList<ActorOutfit>? Outfits = null);
+
+/// <summary>
+/// A look of an actor's: the meshes of its scene drawn while its character wears it. The first outfit whose conditions the character
+/// meets is worn, and one with none is met by anyone, a character or not; the meshes the others name are hidden.
+/// </summary>
+/// <param name="Meshes">The names of the scene's nodes it draws.</param>
+/// <param name="Armored">
+/// Met only while the character wears body armour that protects (<c>true</c>), which Regular Clothing doesn't, or only while it
+/// doesn't (<c>false</c>); null for either.
+/// </param>
+/// <param name="Items">Met only while the character has one of these equipped; null for any.</param>
+public sealed record ActorOutfit(IReadOnlyList<string> Meshes, bool? Armored = null, IReadOnlyList<RecordId>? Items = null);
 
 /// <summary>
 /// A head scene drawn at one of the actor's locators. Only Alaron's actor has one: his body's scene

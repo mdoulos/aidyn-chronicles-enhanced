@@ -332,6 +332,9 @@ public partial class Game : Node3D, ITrekHost, IPauseMenuHost, ICombatHost
         else if (_models!.InstantiateActor(actor, rolls: _models.BodyRolls) is var (model, animator))
         {
             _player.SetModel(model);
+            // The leader's outfit, by what it wears as that changes.
+            if (OutfitSwitch.Of(model) is { } outfits)
+                outfits.Wearer = _session.Game.Party.Members.FirstOrDefault();
             ShadowDecal.MarkBody(model);
             if (animator is not null)
             {

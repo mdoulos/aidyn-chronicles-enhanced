@@ -80,7 +80,7 @@ public partial class Game
         {
             if (!_actorViews.TryGetValue(actor, out var view))
             {
-                view = _actorViews[actor] = new CutSceneActorView(actor, _plugins!, _models!, _shadowTexture);
+                view = _actorViews[actor] = new CutSceneActorView(actor, _plugins!, _models!, _shadowTexture, _session!.Game.Party.Get(actor.Entity));
                 AddChild(view);
                 // It was placed as it was made; Godot resets interpolation from where a node is now.
                 view.ResetPhysicsInterpolation();

@@ -223,6 +223,8 @@ public partial class ModelView : VBoxContainer
         if (actor is not null && (_player is not null || file.Extras.StillAnimations.Count > 0))
         {
             _actor = actor;
+            // One outfit at a time, the one no character wears, not all of them over each other.
+            OutfitSwitch.Add(actor, scene);
             var rootName = SceneNames.Transform(actor.RootTransform);
             _root = Nodes.FindAll<Node3D>(scene).FirstOrDefault(n => n.Name == rootName);
             _pivot = file.Clips(actor.RootTransform).Pivot.ToGodot();

@@ -30,6 +30,8 @@ public partial class CombatantView : BodyView
 
     public Combatant Combatant { get; }
 
+    protected override Core.Characters.Character? Wearer => Combatant.Sheet;
+
     /// <summary>Moves the node to where the body is, and puts in its hands what it holds (<see cref="Combatant.Held"/>). Call after each tick.</summary>
     public override void Sync()
     {

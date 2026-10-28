@@ -37,6 +37,9 @@ public abstract partial class BodyView : Node3D
     /// <summary>The meshes of its actor and of what it holds, made again as what it holds changes.</summary>
     private GeometryInstance3D[]? _meshes;
 
+    /// <summary>What draws its actor's outfit, if the actor has outfits.</summary>
+    private OutfitSwitch? _outfits;
+
     /// <summary>
     /// Makes the view of <paramref name="body"/>, which looks like <paramref name="look"/>. A derived view calls
     /// <see cref="Sync"/> when it has made what it adds.
@@ -141,6 +144,7 @@ public abstract partial class BodyView : Node3D
         ShadowDecal.MarkBody(node);
         // Its emitters' particles show and fade with it (Level.Show).
         _model = new Level(node, null) { Animator = animator };
+        _outfits = OutfitSwitch.Of(node);
         _meshes = null;
         if (animator is not null)
             animator.Driven = true;
@@ -206,12 +210,17 @@ public abstract partial class BodyView : Node3D
     /// <summary>The actor's scene, or null for a body whose entity has no actor.</summary>
     protected Node3D? Model => _model?.Node;
 
+    /// <summary>The character whose outfit its actor draws (<see cref="OutfitSwitch"/>), or null for a body that's no character's.</summary>
+    protected virtual Core.Characters.Character? Wearer => null;
+
     /// <summary>Moves the node to where the body is, and turns the model to its heading. Call after each tick.</summary>
     public virtual void Sync()
     {
         Position = (Body.Sphere.Position - new System.Numerics.Vector3(0, Body.Sphere.Radius, 0)).ToGodot();
         if (_turn is not null)
             _turn.Rotation = new Vector3(0, Mathf.Atan2(Body.Heading.X, Body.Heading.Y), 0);
+        if (_outfits is not null && _outfits.Wearer != Wearer)
+            _outfits.Wearer = Wearer;
     }
 
     /// <summary>

@@ -20,10 +20,12 @@ namespace AidynRenewed.Game;
 /// </remarks>
 public partial class CutSceneActorView : BodyView
 {
-    public CutSceneActorView(CutSceneActor actor, PluginSet plugins, Models models, Texture2D? shadow)
+    /// <param name="member">The party member it is, whose outfit its actor draws, or null for one that's in no party.</param>
+    public CutSceneActorView(CutSceneActor actor, PluginSet plugins, Models models, Texture2D? shadow, Core.Characters.Character? member = null)
         : base($"Actor {actor.Entity}", actor.Body, actor.Look, plugins, models, shadow)
     {
         Actor = actor;
+        _member = member;
         Sync();
     }
 
@@ -33,6 +35,10 @@ public partial class CutSceneActorView : BodyView
     }
 
     public CutSceneActor Actor { get; }
+
+    private readonly Core.Characters.Character? _member;
+
+    protected override Core.Characters.Character? Wearer => _member;
 
     /// <summary>Moves the node to where the body is, and puts what it holds in its hand. Call after each tick.</summary>
     public override void Sync()
