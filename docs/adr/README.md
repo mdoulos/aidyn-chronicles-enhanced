@@ -35,5 +35,6 @@ These are the Phase 0 decisions from the [roadmap](../roadmap.md) (task 0.5). Ea
 | [0029](0029-content-fixes-wait-for-a-bugfix-mod.md) | The base import fixes only content that breaks the game; other content fixes wait for a bugfix mod | Accepted |
 | [0030](0030-the-project-is-aidyn-renewed.md) | The project is Aidyn Renewed, a fork of HBHT: the code is `AidynRenewed.*`, the tool is `aidyn-renewed`, the data folder is `AidynRenewed`, the packages are the fork's own; no third-party decompilation's names are cited, and the citations 0015 kept as credit are removed | Accepted |
 | [0031](0031-a-data-edit-of-1.0-imports.md) | A ROM hack of NA 1.0 that changed only bytes of the tables the layout places imports as 1.0 under its own hash; the importer's name checks against 1.0's data apply to 1.0 alone | Accepted |
+| [0032](0032-rechronicled-is-read-for-its-findings.md) | Aidyn ReChronicled is cloned beside the project without its submodules and read for its findings and designs, rebuilt in the port's own code and confirmed in the machine code, with credit; its bundled decompilation stays unread, and its code, art and samples wait for its author's explicit yes | Accepted |
 
 Statuses: **Proposed** means drafted and waiting for review. **Accepted** means agreed. **Superseded** means replaced by a later record, which it links to.

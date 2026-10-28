@@ -105,6 +105,11 @@ name, packages, docs and the names its code cites are its own
 
 - [AidynEditor](https://github.com/TiberGuy/AidynEditor) (MIT licensed): used
   to cross-check the database's fields.
+- [Aidyn ReChronicled](https://github.com/spitzdano/AidynReChronicled) by
+  Spitzdano: its findings and designs (fixes to the original's bugs, its
+  rendering and sound work, its play aids) guide work here, with his
+  permission, rebuilt in this project's own code and checked against the ROM
+  ([ADR 0032](docs/adr/0032-rechronicled-is-read-for-its-findings.md)).
 - Early in HBHT's life, a community decompilation of the game served as a map
   to the ROM's machine code. No code was copied from it, HBHT stopped reading
   it on October 4, 2026
