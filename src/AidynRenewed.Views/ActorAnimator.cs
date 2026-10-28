@@ -71,6 +71,8 @@ public sealed class ActorAnimator : IActorMotion
 
     public bool Entered => Motion.Entered;
 
+    public bool Knows(int request) => Motion.Knows(request);
+
     /// <summary>The animation the actor is asked for.</summary>
     public int Request
     {

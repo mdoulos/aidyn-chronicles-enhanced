@@ -27,6 +27,14 @@ public sealed class Body
     /// </summary>
     public const int Idle = 0, Walk = 2, Run = 3, Talk = 4, Dying = 9, Sneak = 25;
 
+    /// <summary>
+    /// The port's full run, which the Run control asks for where he'd run (<see cref="Run"/>, which plain movement asks for, plays as a
+    /// jog in a mod that has it). No original actor has a branch for it, so a body whose actor has none runs as before
+    /// (<see cref="Animate"/>); a mod's actor adds states for it. Combat keeps only requests 0 to 3, 20 to 22 and 25 past a frame, so
+    /// it's trek's alone.
+    /// </summary>
+    public const int FullRun = 26;
+
     /// <summary>A body's gravity, a tick² (about 10.8 m/s²).</summary>
     public const float Gravity = 0.003f;
 
@@ -335,7 +343,7 @@ public sealed class Body
         var tilt = input.Stick.Length();
         if (tilt <= Deadzone)
             return;
-        Go(tilt, Vector2.Normalize(Facing.Rotate(new Vector2(-input.Stick.X, input.Stick.Y), look.X, look.Y)), input.Sneak);
+        Go(tilt, Vector2.Normalize(Facing.Rotate(new Vector2(-input.Stick.X, input.Stick.Y), look.X, look.Y)), input.Sneak, input.Run);
     }
 
     /// <summary>
@@ -383,18 +391,19 @@ public sealed class Body
     /// tick, and returns how far their root moved it forward. The root moves the body only while it's asked for something, or
     /// its state was entered under a request (<c>Bodies.Process</c>, <c>0x80013318</c>–<c>0x80013328</c>, the body's <c>+0x14</c> and
     /// <c>+0x1A</c>): a stop entered as it goes back to idle plays in place, however its root moves, as a run's stop that carries its
-    /// root back to rest does.
+    /// root back to rest does. A full run its actor has no branch for is played as the run.
     /// </summary>
     internal float Animate(IRootMotion animation)
     {
         _pace += Pace;
         var forward = 0f;
+        var request = Request == FullRun && !(animation is Actors.IActorMotion actor && actor.Knows(FullRun)) ? Run : Request;
         for (; _pace >= 1; _pace--)
         {
-            var moved = animation.Tick(Request);
+            var moved = animation.Tick(request);
             if (animation is Actors.IActorMotion { Entered: true })
-                _entryRequest = Request;
-            if (Request != Idle || _entryRequest != Idle)
+                _entryRequest = request;
+            if (request != Idle || _entryRequest != Idle)
                 forward += moved;
         }
         return forward;
@@ -429,14 +438,14 @@ public sealed class Body
 
     /// <summary>
     /// The stick read past its <see cref="Deadzone"/> (<c>Actor::Move</c>): it sneaks if asked, and otherwise walks
-    /// under <see cref="RunTilt"/> and runs from it, turning toward <paramref name="way"/> <see cref="TurnPerFrame"/>
-    /// a frame.
+    /// under <see cref="RunTilt"/> and runs from it, in full with <paramref name="run"/> (<see cref="FullRun"/>), turning toward
+    /// <paramref name="way"/> <see cref="TurnPerFrame"/> a frame.
     /// </summary>
     /// <param name="tilt">How far the stick is tilted, 0 to 1.</param>
     /// <param name="way">The way the stick points, in the world's X and Z.</param>
-    internal void Go(float tilt, Vector2 way, bool sneak = false)
+    internal void Go(float tilt, Vector2 way, bool sneak = false, bool run = false)
     {
-        Request = sneak ? Sneak : tilt >= RunTilt ? Run : Walk;
+        Request = sneak ? Sneak : tilt >= RunTilt ? (run ? FullRun : Run) : Walk;
         Heading = Facing.Turn(Heading, way, Cadence.PerTick(TurnPerFrame));
     }
 
@@ -626,6 +635,8 @@ public sealed class Body
         public int Frame => animation.Frame;
 
         public bool Entered { get; private set; }
+
+        public bool Knows(int request) => animation.Knows(request);
 
         public float Tick(int request)
         {

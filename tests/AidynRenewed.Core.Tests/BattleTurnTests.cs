@@ -497,6 +497,52 @@ public sealed class BattleTurnTests
     }
 
     [Fact]
+    public void RunHeldAsksForTheFullRunWhereItWouldRunAndNowhereElse()
+    {
+        var body = Driven();
+
+        body.Drive(new MoveInput(new Vector2(0, 0.95f), Run: true), new Vector2(0, 1));
+        Assert.Equal(Body.FullRun, body.Request);
+
+        body.Drive(new MoveInput(new Vector2(0, 0.5f), Run: true), new Vector2(0, 1));
+        Assert.Equal(Body.Walk, body.Request);
+
+        body.Drive(new MoveInput(new Vector2(0, 0.95f), Sneak: true, Run: true), new Vector2(0, 1));
+        Assert.Equal(Body.Sneak, body.Request);
+    }
+
+    [Theory]
+    [InlineData(false, Body.Run)]
+    [InlineData(true, Body.FullRun)]
+    public void AFullRunItsActorHasNoBranchForPlaysAsTheRun(bool knows, int played)
+    {
+        var body = Driven();
+        var actor = new RequestLog(knows);
+        body.Drive(new MoveInput(new Vector2(0, 1), Run: true), new Vector2(0, 1));
+
+        body.Animate(actor);
+
+        Assert.Equal(Body.FullRun, body.Request);
+        Assert.Equal([played], actor.Ticked);
+    }
+
+    /// <summary>An actor that only notes what it's asked for, which has a branch for the full run or doesn't.</summary>
+    private sealed class RequestLog(bool knowsFullRun) : AidynRenewed.Core.Actors.IActorMotion
+    {
+        public List<int> Ticked { get; } = [];
+
+        public int StateLength => 10;
+
+        public bool Knows(int request) => knowsFullRun && request == Body.FullRun;
+
+        public float Tick(int request)
+        {
+            Ticked.Add(request);
+            return 0;
+        }
+    }
+
+    [Fact]
     public void ADrivenBodyTurnsTowardTheStick()
     {
         var body = Driven();

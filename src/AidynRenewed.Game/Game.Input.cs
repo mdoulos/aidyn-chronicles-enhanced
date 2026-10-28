@@ -64,7 +64,8 @@ public partial class Game
 
     /// <summary>
     /// The controls as the original reads them: the stick walks under 80% tilt and runs above, and R with the stick orbits the
-    /// camera, holding him still. On a PC, Shift walks and Ctrl sneaks, and the camera turns by the sources Camera takes alone, by
+    /// camera, holding him still. On a PC, Ctrl walks, Shift runs in full (a port addition, <c>Body.FullRun</c>) and C sneaks, and the
+    /// camera turns by the sources Camera takes alone, by
     /// Camera Left and Right, and, while Camera Hold is held, by the sources Move and Camera share (instead of moving him) and the
     /// mouse; with the mouse on Camera, the mouse always turns it (ADR 0026).
     /// </summary>
@@ -102,7 +103,7 @@ public partial class Game
         }
         // He stands still only while what would move him steers, as with R; a source of Move's alone still walks him.
         var free = !(hold && shared != Vector2.Zero) || own != Vector2.Zero;
-        return new PlayerInput(stick, Input.IsActionPressed(GameControls.Sneak), orbit, orbitStick, Free: free);
+        return new PlayerInput(stick, Input.IsActionPressed(GameControls.Sneak), orbit, orbitStick, Free: free, Run: Input.IsActionPressed(GameControls.Run));
 
         // Up, down, left and right as Godot's vector: up is negative y.
         static Vector2 Vector(string[] actions) => Input.GetVector(actions[2], actions[3], actions[0], actions[1]);

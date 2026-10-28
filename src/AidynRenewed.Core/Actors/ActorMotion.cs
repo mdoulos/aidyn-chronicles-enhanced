@@ -39,6 +39,8 @@ public sealed class ActorMotion : IActorMotion
 
     public ActorStateMachine Machine { get; }
 
+    public bool Knows(int request) => Machine.Knows(request);
+
     public ActorClips Clips => _clips;
 
     /// <summary>The animation the actor is asked for.</summary>

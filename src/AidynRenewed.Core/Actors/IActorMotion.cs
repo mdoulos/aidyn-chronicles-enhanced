@@ -20,6 +20,9 @@ public interface IActorMotion : IRootMotion
     /// </summary>
     bool Entered => true;
 
+    /// <summary>Whether any of its actor's states has a branch for the request, without which no state takes it.</summary>
+    bool Knows(int request) => false;
+
     /// <summary>For a body with no animations, or none yet: it stands, and its state lasts a tick.</summary>
     static readonly IActorMotion Still = new StillMotion();
 

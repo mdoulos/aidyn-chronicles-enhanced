@@ -28,8 +28,9 @@ public class ControlBindingsTests : IDisposable
     [InlineData("camera_hold", "Mouse:Right", "Joy:RB")]
     [InlineData("camera_left", "Key:Q", "")]
     [InlineData("camera_right", "Key:E", "")]
-    [InlineData("walk", "Key:Shift", "")]
-    [InlineData("sneak", "Key:Ctrl", "Axis:LeftTrigger+")]
+    [InlineData("walk", "Key:Ctrl", "")]
+    [InlineData("run", "Key:Shift", "Joy:LS")]
+    [InlineData("sneak", "Key:C", "Axis:LeftTrigger+")]
     // pause: Enter, Escape, Start; menu_accept Space, A; menu_back Backspace, B.
     [InlineData("use", "Key:Space", "Joy:A")]
     [InlineData("portraits", "Key:Backspace", "Joy:B")]
@@ -67,7 +68,7 @@ public class ControlBindingsTests : IDisposable
     [Fact]
     public void EveryControlIsListedOnceAndTheDefaultsDontConflict()
     {
-        Assert.Equal(29, GameControls.All.Count);
+        Assert.Equal(30, GameControls.All.Count);
         Assert.Equal(GameControls.All.Count, GameControls.All.Select(c => c.Id).Distinct().Count());
         Assert.Empty(new ControlBindings().Conflicts());
         Assert.All(GameControls.All.SelectMany(c => c.Keyboard.Concat(c.Controller)), b => Assert.True(Binding.IsValid(b), b));

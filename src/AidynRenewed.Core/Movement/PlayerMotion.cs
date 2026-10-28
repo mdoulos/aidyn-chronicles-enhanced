@@ -9,7 +9,7 @@ namespace AidynRenewed.Core.Movement;
 /// <param name="Held">
 /// Something else has the stick, as the trek camera's orbit does with R held: he stands, and neither turns nor reads it.
 /// </param>
-public readonly record struct MoveInput(Vector2 Stick, bool Sneak = false, bool Held = false);
+public readonly record struct MoveInput(Vector2 Stick, bool Sneak = false, bool Held = false, bool Run = false);
 
 /// <summary>Plays an actor's animations and reports how far their root moves.</summary>
 public interface IRootMotion
@@ -188,6 +188,6 @@ public sealed class PlayerMotion
         TurnTo = null;
         // Up on the stick is the way the camera looks, and right is to its right.
         var wanted = Vector2.Normalize(Facing.Rotate(new Vector2(-input.Stick.X, input.Stick.Y), look.X, look.Y));
-        Body.Go(tilt, wanted, input.Sneak);
+        Body.Go(tilt, wanted, input.Sneak, input.Run);
     }
 }

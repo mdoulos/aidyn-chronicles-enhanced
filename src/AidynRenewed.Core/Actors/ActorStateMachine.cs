@@ -40,6 +40,11 @@ public sealed class ActorStateMachine
 
     public ActorRecord Actor => _actor;
 
+    /// <summary>Whether any of its states has a branch for the request, without which no state takes it.</summary>
+    public bool Knows(int request) => (_known ??= [.. _actor.States.SelectMany(s => s.Branches).Select(b => b.Request)]).Contains(request);
+
+    private HashSet<int>? _known;
+
     /// <summary>The state playing.</summary>
     public int State { get; private set; }
 

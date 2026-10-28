@@ -269,8 +269,9 @@ The port's own page ([ADR 0026](../adr/0026-controls-are-bound-by-situation.md),
   | | Camera | None | Both Sticks | what steers the camera ([cameras](cameras.md#the-follow-camera-cameramode0)) |
   | | Camera Hold | Right Click | RB | the N64's R: steers with what moves |
   | | Camera Left, Camera Right | Q, E | None | turn the camera |
-  | | Walk | Shift | None | the stick at half tilt |
-  | | Sneak | Ctrl | LT | Z |
+  | | Walk | Ctrl | None | the stick at half tilt |
+  | | Run | Shift | LS | a port addition: runs in full where he'd run, if his actor can ([movement](movement.md#the-full-run)) |
+  | | Sneak | C | LT | Z |
   | | Use | Space | A | A: uses the map object reached |
   | | Portraits | Backspace | B | B: raises or lowers the portraits |
   | | Menu | Enter, Escape | Start | Start: opens the pause menu |

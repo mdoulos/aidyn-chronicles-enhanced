@@ -132,6 +132,8 @@ public sealed class AudioKeys(GameAudio audio, SoundsRecord sounds, IRandom rand
 
         public bool Entered => animation.Entered;
 
+        public bool Knows(int request) => animation.Knows(request);
+
         public float Tick(int request)
         {
             var forward = animation.Tick(request);

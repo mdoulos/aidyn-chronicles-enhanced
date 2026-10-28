@@ -12,7 +12,9 @@ namespace AidynRenewed.Core.Trek;
 /// A second stick turns the camera, so the first still moves him while it does. The original has one stick, and
 /// orbiting stops him; this is a port addition.
 /// </param>
-public readonly record struct PlayerInput(Vector2 Stick, bool Sneak = false, bool Orbit = false, Vector2 OrbitStick = default, bool Free = false)
+/// <param name="Run">Run held: run in full where he'd run, if his actor can (<see cref="Body.FullRun"/>); a port addition.</param>
+public readonly record struct PlayerInput(Vector2 Stick, bool Sneak = false, bool Orbit = false, Vector2 OrbitStick = default, bool Free = false,
+    bool Run = false)
 {
     /// <summary>Orbiting holds him still, as in the original.</summary>
     public bool Locked => Orbit && !Free;
@@ -20,6 +22,6 @@ public readonly record struct PlayerInput(Vector2 Stick, bool Sneak = false, boo
     /// <summary>Whether the stick is pushed past its deadzone to move him.</summary>
     public bool Pushed => Stick.Length() > Body.Deadzone;
 
-    /// <summary>What moves him: the stick and Z, unless the orbit holds him.</summary>
-    public MoveInput Move => new(Stick, Sneak, Locked);
+    /// <summary>What moves him: the stick, Z and Run, unless the orbit holds him.</summary>
+    public MoveInput Move => new(Stick, Sneak, Locked, Run);
 }

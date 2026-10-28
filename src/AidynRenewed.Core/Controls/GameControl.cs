@@ -91,7 +91,7 @@ public static class GameControls
     private static readonly string[] Lookable = [.. Walkable, InputSource.Mouse];
 
     public const string Move = "move", Camera = "camera", CameraHold = "camera_hold", CameraLeft = "camera_left", CameraRight = "camera_right",
-        Walk = "walk", Sneak = "sneak", Use = "use", Portraits = "portraits", Pause = "pause";
+        Walk = "walk", Run = "run", Sneak = "sneak", Use = "use", Portraits = "portraits", Pause = "pause";
 
     public const string MenuCursor = "menu_cursor", MenuAccept = "menu_accept", MenuBack = "menu_back", MenuClose = "menu_close",
         MenuDetails = "menu_details", MenuAppraise = "menu_appraise", MenuMemberLeft = "menu_member_left", MenuMemberRight = "menu_member_right",
@@ -115,9 +115,10 @@ public static class GameControls
         Button(CameraHold, "Camera Hold", Situation.Trek, Walking, null, ["Mouse:Right"], ["Joy:RB"]),
         Button(CameraLeft, "Camera Left", Situation.Trek, Walking, null, ["Key:Q"], []),
         Button(CameraRight, "Camera Right", Situation.Trek, Walking, null, ["Key:E"], []),
-        Button(Walk, "Walk", Situation.Trek, Walking, null, ["Key:Shift"], []),
+        Button(Walk, "Walk", Situation.Trek, Walking, null, ["Key:Ctrl"], []),
+        Button(Run, "Run", Situation.Trek, Situation.Trek, null, ["Key:Shift"], ["Joy:LS"]),
         // Sneak acts in a battle's turn too, as it always has, but isn't checked there: the left trigger is also Skip Turn.
-        Button(Sneak, "Sneak", Situation.Trek, Situation.Trek, null, ["Key:Ctrl"], ["Axis:LeftTrigger+"]),
+        Button(Sneak, "Sneak", Situation.Trek, Situation.Trek, null, ["Key:C"], ["Axis:LeftTrigger+"]),
         Button(Use, "Use", Situation.Trek, Situation.Trek, MenuAction.Accept, ["Key:Space"], ["Joy:A"]),
         Button(Portraits, "Portraits", Situation.Trek, Situation.Trek, MenuAction.Back, ["Key:Backspace"], ["Joy:B"]),
         Button(Pause, "Menu", Situation.Trek, Situation.Trek, MenuAction.Start, ["Key:Enter", "Key:Escape"], ["Joy:Start"], essential: true),
