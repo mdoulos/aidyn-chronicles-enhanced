@@ -118,6 +118,12 @@ public sealed class Settings
     public bool BriskPace { get; set; }
 
     /// <summary>
+    /// Whether the title starts with the original's intro cards (<see cref="Ui.IntroCards"/>): the Expansion Pak's, the legal text and
+    /// the N64's, THQ's and H2O's logos. Off, the user's choice, it starts at its logo and menu.
+    /// </summary>
+    public bool IntroCards { get; set; }
+
+    /// <summary>
     /// How the lasting spells' and potions' scenes over heads take their turns in a battle: one at a time across the battle, as the
     /// original's, or each character's at once (<see cref="Combat.SpellFx.Turns"/>).
     /// </summary>

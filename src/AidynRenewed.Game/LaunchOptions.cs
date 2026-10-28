@@ -81,8 +81,16 @@ public sealed class LaunchOptions(Dictionary<string, string> values)
         _ => true,
     };
 
-    /// <summary>Whether the title starts with its intro cards: but for <c>--title logo</c>.</summary>
-    public bool TitleCards => Text("title") != "logo";
+    /// <summary>
+    /// Whether the title starts with its intro cards: always for <c>--title cards</c>, never for <c>--title logo</c>, and otherwise by
+    /// the Intro Logos setting (<see cref="Core.Settings.IntroCards"/>).
+    /// </summary>
+    public bool TitleCards(Core.Settings settings) => Text("title") switch
+    {
+        "cards" => true,
+        "logo" => false,
+        _ => settings.IntroCards,
+    };
 
     /// <summary>Whether the start says where the player stands, in place of a save's.</summary>
     public bool PlacesPlayer => values.ContainsKey("chunk") || values.ContainsKey("at");

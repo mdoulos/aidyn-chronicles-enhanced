@@ -84,10 +84,11 @@ public class SystemMenuTests(BarterPlugins fixture) : IClassFixture<BarterPlugin
         options.Back();
         options.Point(2);
         options.Accept();
-        Assert.Equal(["Draw Distance", "Object Distance", "Model Detail", "Surface Detail", "Animation Blending", "Rain and Snow", "Menu Size", "Menu Filter", "Pace", "Status Auras"],
+        Assert.Equal(["Draw Distance", "Object Distance", "Model Detail", "Surface Detail", "Animation Blending", "Rain and Snow", "Menu Size", "Menu Filter", "Pace", "Status Auras", "Intro Logos"],
             options.Rows.Rows.Select(r => r.Label));
-        // A new player's are the original's, and the original's video out; Surface Detail's Full and Animation Blending's Smooth show only on a mod's model.
-        Assert.Equal(["Original", "Original", "Original", "Full", "Smooth", "Original", "Original", "Video Out", "Original", "Original"],
+        // A new player's are the original's, and the original's video out; Surface Detail's Full and Animation Blending's Smooth show only on a
+        // mod's model, and the intro logos are skipped, the user's choice.
+        Assert.Equal(["Original", "Original", "Original", "Full", "Smooth", "Original", "Original", "Video Out", "Original", "Original", "Skip"],
             options.Rows.Rows.Select(r => r.ValueName));
     }
 

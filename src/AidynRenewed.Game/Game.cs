@@ -211,7 +211,7 @@ public partial class Game : Node3D, ITrekHost, IPauseMenuHost, ICombatHost
         _windowSave.Timeout += () => _settings.Save(DataPaths.Settings);
         AddChild(_windowSave);
         if (title)
-            StartTitle(options.TitleCards && !_titleLogo);
+            StartTitle(options.TitleCards(_settings) && !_titleLogo);
         _titleLogo = false;
         RunLaunchActions(options);
         if (fresh)

@@ -367,6 +367,7 @@ public sealed partial class OptionsMenu
             Choice("Pace", ["Original", "Brisk"], () => s.BriskPace ? 1 : 0, v => s.BriskPace = v == 1),
             Choice("Status Auras", ["Original", "More Often"], () => s.SpellAuras == Combat.AuraTurns.EachCharacter ? 1 : 0,
                 v => s.SpellAuras = v == 1 ? Combat.AuraTurns.EachCharacter : Combat.AuraTurns.Battle),
+            Choice("Intro Logos", ["Original", "Skip"], () => s.IntroCards ? 0 : 1, v => s.IntroCards = v == 0),
         ];
     }
 
